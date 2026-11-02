@@ -1,15 +1,10 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
-import {
-  BookOpenIcon,
-  CheckCircle2Icon,
-} from "lucide-react";
+import { BookOpenIcon, CheckCircle2Icon } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { BookCard } from "@/components/books/book-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,15 +20,20 @@ import { useAuth } from "@/components/auth/auth-context";
 import {
   type Book,
   CATEGORIES,
-  formatDate,
+  getBooksSnapshot,
+  getBooksServerSnapshot,
   saveBook,
+  subscribeToBooks,
 } from "@/lib/books";
 
-/** Fallback cover while no image is chosen (simple data-URL placeholder) */
-const EMPTY_IMAGE =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='180'><rect width='100%25' height='100%25' fill='%23e4dcc7'/><text x='50%25' y='52%25' text-anchor='middle' font-size='13' fill='%236b6353'>BookNook</text></svg>";
-
-export default function AddBookPage() {  const { user } = useAuth();
+export default function AddBookPage() {
+  const { user } = useAuth();
+  // Auto-refreshes whenever a book is saved (useSyncExternalStore)
+  const books = React.useSyncExternalStore(
+    subscribeToBooks,
+    getBooksSnapshot,
+    getBooksServerSnapshot
+  );
 
   const [title, setTitle] = React.useState("");
   const [author, setAuthor] = React.useState("");
@@ -41,47 +41,47 @@ export default function AddBookPage() {  const { user } = useAuth();
   const [totalCopies, setTotalCopies] = React.useState("1");
   const [description, setDescription] = React.useState("");
 
-  const [addedBook, setAddedBook] = React.useState<Book | null>(null);
+  const [justAdded, setJustAdded] = React.useState(false);
   const [imagePreview, setImagePreview] = React.useState<string>("");
-  const [imagePending, setImagePending] = React.useState(false);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return setImagePreview("");
+    if (!file) {
+      setImagePreview("");
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => setImagePreview(String(reader.result));
     reader.readAsDataURL(file);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Map form → the exact Book data contract used across BookNook
+
+    // Map the form onto the exact BookNook Book data contract
     const book: Book = {
       title: title.trim(),
       author: author.trim(),
       category,
-      image: imagePreview, // data URL; falls back to a placeholder at render time
+      image: imagePreview, // cover URL (data URL). Placeholder renders when empty.
       description: description.trim(),
       totalCopies: Math.max(1, Number(totalCopies) || 1),
       availableCopies: Math.max(1, Number(totalCopies) || 1),
-      addedBy: user?.name ?? "Guest",
-      addedByEmail: user?.email ?? "guest@booknook.com",
+      addedBy: user?.name ?? "John Doe",
+      addedByEmail: user?.email ?? "john@example.com",
       createdAt: new Date(),
     };
 
-    setImagePending(true);
-    try {
-      saveBook(book);
-      setAddedBook(book);
-      setTitle("");
-      setAuthor("");
-      setCategory("Fiction");
-      setTotalCopies("1");
-      setDescription("");
-      setImagePreview("");
-    } finally {
-      setImagePending(false);
-    }
+    saveBook(book);
+    setJustAdded(true);
+
+    // Reset the form for the next book
+    setTitle("");
+    setAuthor("");
+    setCategory("Fiction");
+    setTotalCopies("1");
+    setDescription("");
+    setImagePreview("");
   }
 
   const fieldLabel = "mb-2 block";
@@ -101,6 +101,19 @@ export default function AddBookPage() {  const { user } = useAuth();
       </div>
 
       <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+        {/* Submit confirmation */}
+        {justAdded && (
+          <div
+            role="status"
+            className="mb-8 flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3"
+          >
+            <CheckCircle2Icon className="size-5 shrink-0 text-primary" />
+            <p className="text-sm font-medium text-foreground">
+              Your book was added successfully. Find it in the shelf below.
+            </p>
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2"
@@ -125,7 +138,7 @@ export default function AddBookPage() {  const { user } = useAuth();
             <Input
               id="author"
               required
-              placeholder="e.g. Héctor García"
+              placeholder="e.g. Hector Garcia and Francesc Miralles"
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
             />
@@ -187,7 +200,7 @@ export default function AddBookPage() {  const { user } = useAuth();
               id="description"
               required
               rows={4}
-              placeholder="What is this book about?"
+              placeholder="e.g. An exploration of Japanese philosophy, life purpose, healthy habits, happiness..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -200,7 +213,7 @@ export default function AddBookPage() {  const { user } = useAuth();
             <Input
               id="name"
               required
-              placeholder="Your name"
+              placeholder="e.g. John Doe"
               defaultValue={user?.name ?? ""}
               key={user?.name ?? "guest-name"}
             />
@@ -214,7 +227,7 @@ export default function AddBookPage() {  const { user } = useAuth();
               id="email"
               required
               type="email"
-              placeholder="you@booknook.com"
+              placeholder="e.g. john@example.com"
               defaultValue={user?.email ?? ""}
               key={user?.email ?? "guest-email"}
             />
@@ -224,68 +237,45 @@ export default function AddBookPage() {  const { user } = useAuth();
           <Button
             type="submit"
             size="lg"
-            disabled={imagePending}
             className="justify-center sm:col-span-2"
           >
             <BookOpenIcon className="size-4" />
             Add Book
           </Button>
         </form>
-
-        {/* Success feedback */}
-        {addedBook && (
-          <Card className="mt-10 border-primary/40 bg-background">
-            <CardContent className="flex flex-col gap-4 sm:flex-row">
-              <div className="relative mx-auto aspect-[2/3] w-32 shrink-0 overflow-hidden rounded-lg bg-muted sm:mx-0">
-                {addedBook.image ? (
-                  <Image
-                    src={addedBook.image}
-                    alt={addedBook.title}
-                    fill
-                    sizes="128px"
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <Image
-                    src={EMPTY_IMAGE}
-                    alt={addedBook.title}
-                    fill
-                    sizes="128px"
-                    className="object-cover"
-                    unoptimized
-                  />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-2 text-sm font-semibold text-primary">
-                  <CheckCircle2Icon className="size-4" />
-                  Book added successfully!
-                </p>
-                <h2 className="mt-2 truncate text-lg font-bold text-foreground">
-                  {addedBook.title}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {addedBook.author} · {formatDate(addedBook.createdAt)}
-                </p>
-                <Badge
-                  variant="secondary"
-                  className="mt-3 mb-3 font-medium"
-                >
-                  {addedBook.category}
-                </Badge>
-                <p className="line-clamp-2 text-sm text-muted-foreground">
-                  {addedBook.description}
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {addedBook.availableCopies} of {addedBook.totalCopies} copies
-                  available · Added by {addedBook.addedBy}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
+
+      {/* Books this user added — one card per saved book */}
+      <section className="bg-muted/40 py-16">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+          <div className="mx-auto max-w-xl text-center">
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+              Your Shelf
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Books added from this browser — newest first.
+            </p>
+          </div>
+
+          {books.length === 0 ? (
+            <div className="mx-auto mt-10 max-w-md rounded-xl border border-border border-dashed bg-background px-6 py-10 text-center">
+              <p className="border-none text-sm text-muted-foreground">
+                No books added yet. Fill the form above and your shelf will
+                appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              {books.map((book, i) => (
+                <BookCard
+                  key={`${book.title}-${book.createdAt}-${i}`}
+                  book={book}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </>
   );
 }
