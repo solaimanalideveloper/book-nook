@@ -49,72 +49,76 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* Light theme — warm paper & deep green (bookNook brand) */
+  --background: #fdfaf1;
+  --foreground: #1e2b20;
+  --card: #fffdf7;
+  --card-foreground: #1e2b20;
+  --popover: #fffdf7;
+  --popover-foreground: #1e2b20;
+  --primary: #3d6440;
+  --primary-foreground: #fdfaf1;
+  --secondary: #ece5d2;
+  --secondary-foreground: #1e2b20;
+  --muted: #f1ecdf;
+  --muted-foreground: #6b6353;
+  --accent: #e9e2cf;
+  --accent-foreground: #1e2b20;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #e4dcc7;
+  --input: #e4dcc7;
+  --ring: #3d6440;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #f1ecdf;
+  --sidebar-foreground: #1e2b20;
+  --sidebar-primary: #3d6440;
+  --sidebar-primary-foreground: #fdfaf1;
+  --sidebar-accent: #e9e2cf;
+  --sidebar-accent-foreground: #1e2b20;
+  --sidebar-border: #e4dcc7;
+  --sidebar-ring: #3d6440;
+  color-scheme: light;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /* Dark theme — current bookNook night look */
+  --background: #10140f;
+  --foreground: #f3ebdd;
+  --card: #171d15;
+  --card-foreground: #f3ebdd;
+  --popover: #1a2318;
+  --popover-foreground: #f3ebdd;
+  --primary: #8ab98d;
+  --primary-foreground: #10140f;
+  --secondary: #22301e;
+  --secondary-foreground: #f3ebdd;
+  --muted: #1c241a;
+  --muted-foreground: #b7b3a4;
+  --accent: #22301e;
+  --accent-foreground: #f3ebdd;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: rgba(243, 235, 221, 0.12);
+  --input: rgba(243, 235, 221, 0.16);
+  --ring: #8ab98d;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: #171d15;
+  --sidebar-foreground: #f3ebdd;
+  --sidebar-primary: #4c7a4f;
+  --sidebar-primary-foreground: #f3ebdd;
+  --sidebar-accent: #22301e;
+  --sidebar-accent-foreground: #f3ebdd;
+  --sidebar-border: rgba(243, 235, 221, 0.12);
+  --sidebar-ring: #8ab98d;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -127,4 +131,18 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Hero carousel slow zoom effect */
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.animate-kenburns {
+  animation: kenburns 7s ease-out forwards;
 }
