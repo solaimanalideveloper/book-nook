@@ -26,7 +26,7 @@ export function BookCard({
   return (
     <Card className="gap-3 bg-background pt-0">
       {/* Cover */}
-      <div className="relative aspect-[2/3] w-full overflow-hidden rounded-t-xl bg-muted">
+      <div className="relative aspect-2/3 w-full overflow-hidden rounded-t-xl bg-muted">
         {book.image ? (
           <Image
             src={book.image}
@@ -77,7 +77,7 @@ export function BookCard({
         </div>
         <Button
           nativeButton={false}
-          render={<Link href={`/book-details/${encodeURIComponent(bookId)}`} />}
+          render={<Link href={`/all-books/${encodeURIComponent(bookId)}`} />}
           className="mt-2 w-full"
         >
           View Details

@@ -42,6 +42,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnPath = getSafeReturnPath(searchParams.get("callbackURL"));
+  const hasOAuthError = searchParams.get("oauthError") === "1";
+  const hasAccountNotLinked = searchParams.get("error") === "account_not_linked";
+  const linkProvider = searchParams.get("linkProvider");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
   const [passwordError, setPasswordError] = React.useState("");
@@ -106,7 +109,18 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         router.replace(`/login?callbackURL=${encodeURIComponent(returnPath)}`);
       } else {
         toast.success("Logged in successfully.");
-        router.replace(returnPath);
+        if (hasAccountNotLinked) {
+          const profileURL = new URL("/profile", window.location.origin);
+          if (returnPath !== "/") {
+            profileURL.searchParams.set("returnTo", returnPath);
+          }
+          if (linkProvider === "google" || linkProvider === "github") {
+            profileURL.searchParams.set("linkProvider", linkProvider);
+          }
+          router.replace(`${profileURL.pathname}${profileURL.search}`);
+        } else {
+          router.replace(returnPath);
+        }
       }
     } catch (error) {
       const message =
@@ -121,9 +135,20 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     setSocialProvider(provider);
 
     try {
+      const errorCallbackURL = new URL(
+        isRegister ? "/register" : "/login",
+        window.location.origin,
+      );
+      errorCallbackURL.searchParams.set("oauthError", "1");
+      errorCallbackURL.searchParams.set("linkProvider", provider);
+      if (returnPath !== "/") {
+        errorCallbackURL.searchParams.set("callbackURL", returnPath);
+      }
+
       const result = await authClient.signIn.social({
         provider,
         callbackURL: returnPath,
+        errorCallbackURL: errorCallbackURL.toString(),
       });
 
       if (result.error) {
@@ -231,7 +256,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               className="font-medium text-primary underline-offset-4 hover:underline"
               href={
                 isRegister
-                  ? "/login"
+                  ? returnPath === "/"
+                    ? "/login"
+                    : `/login?callbackURL=${encodeURIComponent(returnPath)}`
                   : returnPath === "/"
                     ? "/register"
                     : `/register?callbackURL=${encodeURIComponent(returnPath)}`
@@ -251,6 +278,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         </div>
 
         <div className="flex flex-col gap-3">
+          {hasOAuthError && (
+            <p role="alert" className="text-sm text-destructive">
+              {hasAccountNotLinked
+                ? `This ${linkProvider === "github" ? "GitHub" : "Google"} account matches an existing BookNook email but is not connected yet. Sign in with your BookNook password below; you can then connect it from your profile.`
+                : "Could not continue with that provider. Please try again or sign in with your BookNook account."}
+            </p>
+          )}
           <Button
             type="button"
             variant="outline"
@@ -282,6 +316,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               : "Continue with GitHub"}
           </Button>
         </div>
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          If you already registered with this email, use your existing sign-in
+          method first. You can connect Google or GitHub from your profile.
+        </p>
       </CardContent>
     </Card>
   );
