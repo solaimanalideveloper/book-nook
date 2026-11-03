@@ -44,6 +44,7 @@ export default async function BookDetailsPage({
 
   const book = (await response.json()) as BookDetails | null;
   if (!book) notFound();
+// comment
 
   const totalCopies = getCopies(book.totalCopies);
   const availableCopies = getCopies(book.availableCopies, totalCopies);
