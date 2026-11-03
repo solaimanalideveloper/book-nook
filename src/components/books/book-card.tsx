@@ -2,8 +2,10 @@ import Image from "next/image";
 import { BookMarkedIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { type Book, formatDate } from "@/lib/books";
+import Link from "next/link";
 
 /** Placeholder cover while a book has no image (tiny inline data-URL) */
 const PLACEHOLDER_COVER =
@@ -14,7 +16,13 @@ const PLACEHOLDER_COVER =
  * title, author, category, image, description,
  * totalCopies, availableCopies, addedBy, addedByEmail, createdAt.
  */
-export function BookCard({ book }: { book: Book }) {
+export function BookCard({
+  book,
+  bookId,
+}: {
+  book: Book;
+  bookId: string;
+}) {
   return (
     <Card className="gap-3 bg-background pt-0">
       {/* Cover */}
@@ -55,16 +63,25 @@ export function BookCard({ book }: { book: Book }) {
         <div className="mt-auto flex flex-col gap-1 border-t border-border pt-3 text-xs text-muted-foreground">
           <p className="flex items-center gap-1.5">
             <BookMarkedIcon className="size-3.5 shrink-0" />
-            {book.availableCopies} of {book.totalCopies} copies available
+            {book.availableCopies ?? book.totalCopies} of {book.totalCopies}{" "}
+            copies available
           </p>
           <p className="truncate">
             Added by{" "}
             <span className="font-medium text-foreground">
-              {book.addedBy}
+              {book.addedBy || "BookNook member"}
             </span>{" "}
-            ({book.addedByEmail}) on {formatDate(book.createdAt)}
+            {book.addedByEmail && `(${book.addedByEmail})`}
+            {book.createdAt && ` on ${formatDate(book.createdAt)}`}
           </p>
         </div>
+        <Button
+          nativeButton={false}
+          render={<Link href={`/book-details/${encodeURIComponent(bookId)}`} />}
+          className="mt-2 w-full"
+        >
+          View Details
+        </Button>
       </CardContent>
     </Card>
   );
