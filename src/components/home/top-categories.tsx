@@ -64,7 +64,7 @@ const CATEGORIES: Category[] = [
 
 export function TopCategories() {
   return (
-    <section className="py-20 lg:py-24">
+    <section className="py-14 sm:py-20 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         {/* Section heading */}
         <div className="mx-auto max-w-xl text-center">
@@ -85,7 +85,7 @@ export function TopCategories() {
               aria-label={`Browse ${category.name} books`}
               className="group"
             >
-              <Card className="items-center text-center transition-all hover:-translate-y-1 hover:shadow-md">
+              <Card className="items-center text-center hover:ring-brand-accent/40">
                 <span className="mt-2 grid size-11 place-items-center rounded-full bg-primary/15 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   <category.icon className="size-5" />
                 </span>

@@ -12,7 +12,10 @@ export default function AddBookPage() {
         </div>
       }
     >
-      <ProtectedRoute returnTo="/add-book">
+      <ProtectedRoute
+        returnTo="/add-book"
+        unauthenticatedTo="/register?callbackURL=%2Fadd-book"
+      >
         <>
           <div className="border-b border-border bg-muted/40 pt-28 pb-14">
             <div className="mx-auto max-w-2xl px-4 text-center sm:px-6">

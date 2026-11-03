@@ -24,7 +24,7 @@ export function BookCard({
   bookId: string;
 }) {
   return (
-    <Card className="gap-3 bg-background pt-0">
+    <Card className="group/book gap-3 pt-0 hover:-translate-y-1.5 hover:shadow-xl hover:ring-brand-accent/50">
       {/* Cover */}
       <div className="relative aspect-2/3 w-full overflow-hidden rounded-t-xl bg-muted">
         {book.image ? (
@@ -33,7 +33,7 @@ export function BookCard({
             alt={book.title}
             fill
             sizes="(min-width: 1280px) 260px, (min-width: 640px) 30vw, 45vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-500 group-hover/book:scale-105 motion-reduce:transition-none"
             unoptimized
           />
         ) : (
@@ -42,7 +42,7 @@ export function BookCard({
             alt={book.title}
             fill
             sizes="(min-width: 1280px) 260px, (min-width: 640px) 30vw, 45vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-500 group-hover/book:scale-105 motion-reduce:transition-none"
             unoptimized
           />
         )}
@@ -78,7 +78,7 @@ export function BookCard({
         <Button
           nativeButton={false}
           render={<Link href={`/all-books/${encodeURIComponent(bookId)}`} />}
-          className="mt-2 w-full"
+          className="mt-2 w-full group-hover/book:shadow-md"
         >
           View Details
         </Button>

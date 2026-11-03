@@ -33,4 +33,4 @@ Next.js 16.4.3 + React 19 app (App Router in `src/app`). Fresh scaffold — `pag
 - **shadcn/ui with the `base-nova` style**: components in `src/components/ui/*` are built on **`@base-ui/react` primitives — NOT Radix UI**. Check `components.json` and existing `src/components/ui` files before reaching for a Radix import. Add missing components with `npx shadcn@latest add <component>`.
 - `cn` is imported from the **`cn` package** in these components (`components.json` aliases `@/lib/utils`, but the generated code uses `cn`). Follow whichever pattern the neighboring file uses.
 - Path alias `@/*` → `src/*` (`tsconfig.json`).
-- Font: Josefin Sans loaded via `next/font/google` in `layout.tsx` using `.className` on `<html>`.
+- Fonts: Inter for body text and Playfair Display for headings, loaded via `next/font/google` in `layout.tsx` as CSS variables.

@@ -17,6 +17,9 @@ import { authClient } from "@/lib/auth-client";
 const PUBLIC_LINKS = [
   { label: "Home", href: "/" },
   { label: "All Books", href: "/all-books" },
+  { label: "Add Book", href: "/add-book" },
+  { label: "My Books", href: "/my-books" },
+  { label: "My Borrows", href: "/my-borrows" },
   { label: "Profile", href: "/profile" },
 ];
 
@@ -42,8 +45,16 @@ export function Navbar() {
   const transparent = pathname === "/" && !scrolled && !menuOpen;
 
   const links = PUBLIC_LINKS.filter((link) =>
-    user ? true : link.href !== "/profile",
+    user
+      ? true
+      : link.href !== "/profile" &&
+        link.href !== "/my-books" &&
+        link.href !== "/my-borrows",
   );
+  const getLinkHref = (href: string) =>
+    href === "/add-book" && !user
+      ? "/register?callbackURL=%2Fadd-book"
+      : href;
 
   return (
     <header
@@ -51,7 +62,7 @@ export function Navbar() {
         "fixed inset-x-0 top-0 z-40 transition-colors duration-300",
         transparent
           ? "bg-transparent"
-          : "border-b border-border bg-background/95 shadow-lg backdrop-blur-md"
+          : "border-b border-border bg-card/95 shadow-md backdrop-blur-md"
       )}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -80,7 +91,7 @@ export function Navbar() {
           {links.map((link) => (
             <li key={link.href}>
               <Link
-                href={link.href}
+                href={getLinkHref(link.href)}
                 className={cn(
                   "rounded-full px-4 py-2 text-sm transition-colors",
                   transparent
@@ -106,14 +117,14 @@ export function Navbar() {
               nativeButton={false}
               render={<Link href="/profile" />}
               className={cn(
-                "rounded-full",
+                "hidden rounded-full lg:inline-flex",
                 transparent && "border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
               )}
             >
               {user.name.split(" ")[0]}
             </Button>
           ) : (
-            <>
+            <div className="hidden items-center gap-1.5 lg:flex">
               <Button
                 nativeButton={false}
                 render={<Link href="/login" />}
@@ -133,7 +144,7 @@ export function Navbar() {
               >
                 Register
               </Button>
-            </>
+            </div>
           )}
 
           <Button
@@ -143,6 +154,7 @@ export function Navbar() {
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
             className={cn(
+              "lg:hidden",
               transparent
                 ? "text-white hover:bg-white/10 hover:text-white"
                 : "text-foreground hover:bg-muted"
@@ -154,12 +166,12 @@ export function Navbar() {
       </nav>
 
       {menuOpen && (
-        <div className="border-t border-border bg-background/95 px-4 pt-2 pb-4 backdrop-blur-md lg:hidden">
+        <div className="border-t border-border bg-card/95 px-4 pt-2 pb-4 backdrop-blur-md lg:hidden">
           <ul className="flex flex-col gap-1">
             {links.map((link) => (
               <li key={link.href}>
                 <Link
-                  href={link.href}
+                  href={getLinkHref(link.href)}
                   onClick={() => setMenuOpen(false)}
                   className={cn(
                     "block rounded-lg px-3 py-2 text-sm transition-colors",
@@ -173,6 +185,37 @@ export function Navbar() {
               </li>
             ))}
           </ul>
+          <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3 lg:hidden">
+            {user ? (
+              <Button
+                nativeButton={false}
+                render={<Link href="/profile" />}
+                variant="outline"
+                className="col-span-2"
+                onClick={() => setMenuOpen(false)}
+              >
+                {user.name}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  nativeButton={false}
+                  render={<Link href="/login" />}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Login
+                </Button>
+                <Button
+                  nativeButton={false}
+                  render={<Link href="/register" />}
+                  variant="outline"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Register
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </header>

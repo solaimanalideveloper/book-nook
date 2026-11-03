@@ -85,7 +85,7 @@ export function HeroCarousel() {
     <section
       aria-roledescription="carousel"
       aria-label="Featured library photos"
-      className="relative h-screen min-h-[560px] overflow-hidden"
+      className="relative h-[100svh] min-h-[560px] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -126,15 +126,14 @@ export function HeroCarousel() {
                   {slide.eyebrow ? (
                     <Badge
                       variant="outline"
-                      className="mb-5 h-7 rounded-full border-white/30 bg-white/10 px-4 text-[11px] font-semibold tracking-[0.3em] text-[#e0b352] uppercase backdrop-blur-sm"
+                      className="mb-5 h-7 rounded-full border-white/30 bg-white/10 px-4 text-[11px] font-semibold tracking-[0.3em] text-brand-accent uppercase backdrop-blur-sm"
                     >
                       {slide.eyebrow}
                     </Badge>
                   ) : null}
                   <h1
                     className={cn(
-                      "max-w-3xl text-4xl leading-[1.1] font-bold text-white sm:text-5xl lg:text-6xl xl:text-7xl",
-                      slide.eyebrow ? "" : "text-5xl lg:text-6xl xl:text-7xl"
+                      "max-w-3xl text-4xl leading-[1.1] font-bold text-white sm:text-5xl lg:text-6xl xl:text-7xl"
                     )}
                   >
                     {slide.title}
@@ -176,7 +175,7 @@ export function HeroCarousel() {
                 onClick={() => api?.scrollTo(i)}
                 className={cn(
                   "h-2.5 w-8 rounded-full p-0 outline-none focus-visible:ring-white/60 hover:bg-white/40",
-                  i === index ? "bg-[#8ab98d]" : "bg-white/40"
+                  i === index ? "bg-brand-accent" : "bg-white/40"
                 )}
               />
             ))}

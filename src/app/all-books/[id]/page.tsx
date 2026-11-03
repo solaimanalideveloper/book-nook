@@ -50,7 +50,7 @@ export default async function BookDetailsPage({
   const availableCopies = getCopies(book.availableCopies, totalCopies);
 
   return (
-    <section className="mx-auto grid min-h-[75vh] max-w-7xl grid-cols-1 items-start gap-8 px-4 py-28 sm:px-6 lg:grid-cols-[minmax(280px,420px)_1fr] lg:gap-10">
+    <section className="mx-auto grid min-h-[75vh] max-w-7xl grid-cols-1 items-start gap-6 px-4 py-24 sm:gap-8 sm:px-6 sm:py-28 lg:grid-cols-[minmax(280px,420px)_1fr] lg:gap-10">
       <div className="relative mx-auto aspect-2/3 w-full max-w-sm overflow-hidden rounded-xl border border-border bg-muted shadow-lg lg:mx-0">
         {book.image ? (
           <Image

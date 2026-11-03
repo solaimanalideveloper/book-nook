@@ -164,7 +164,7 @@ export function AddBookForm() {
   const fieldLabel = "mb-2 block";
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+    <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2"
@@ -275,6 +275,7 @@ export function AddBookForm() {
             type="file"
             accept="image/*"
             required
+            className="w-full min-w-0 text-xs sm:text-sm"
             onChange={(e) => {
               const file = e.target.files?.[0];
               setImageFile(file ?? null);

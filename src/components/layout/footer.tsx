@@ -70,8 +70,8 @@ function XLogo({ className }: { className?: string }) {
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background text-foreground">
-      <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-16 sm:px-6 md:grid-cols-[1.5fr_1fr_1fr]">
+    <footer className="border-t border-border bg-card text-foreground">
+      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 sm:py-16 md:grid-cols-[1.5fr_1fr_1fr] md:gap-10 lg:gap-12">
         {/* Brand block: logo + about line + contact info */}
         <div>
           <div className="flex items-center gap-2.5">
@@ -107,7 +107,7 @@ export function Footer() {
 
         {/* Explore links */}
         <div>
-          <h2 className="mb-8 text-base font-bold">Explore</h2>
+          <h2 className="mb-5 text-base font-bold sm:mb-8">Explore</h2>
           <ul className="flex flex-col gap-4">
             {EXPLORE_LINKS.map((link) => (
               <li key={link.label}>
@@ -124,7 +124,7 @@ export function Footer() {
 
         {/* Legal links */}
         <div>
-          <h2 className="mb-8 text-base font-bold">Legal</h2>
+          <h2 className="mb-5 text-base font-bold sm:mb-8">Legal</h2>
           <ul className="flex flex-col gap-4">
             {LEGAL_LINKS.map((link) => (
               <li key={link.label}>

@@ -36,7 +36,7 @@ const STEPS: Step[] = [
 
 export function HowBorrowingWorks() {
   return (
-    <section className="bg-muted/40 py-20 lg:py-24">
+    <section className="bg-muted/40 py-14 sm:py-20 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         {/* Section heading */}
         <div className="mx-auto max-w-xl text-center">
@@ -53,14 +53,14 @@ export function HowBorrowingWorks() {
           {STEPS.map((step, index) => (
             <Card
               key={step.title}
-              className="bg-background text-center shadow-sm transition-shadow hover:shadow-md"
+              className="text-center hover:ring-brand-accent/35"
             >
               <CardContent className="flex flex-col items-center gap-3 pt-7 pb-8 px-6">
                 <span className="grid size-12 place-items-center rounded-full bg-primary text-primary-foreground">
                   <step.icon className="size-5" />
                 </span>
                 <p
-                  className="text-[11px] font-bold tracking-[0.18em] text-amber-600 uppercase dark:text-amber-400"
+                  className="text-[11px] font-bold tracking-[0.18em] text-brand-accent uppercase"
                   aria-label={`Step ${index + 1}`}
                 >
                   Step {index + 1}

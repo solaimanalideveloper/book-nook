@@ -5,14 +5,16 @@ BookNook is a neighbourhood book-sharing application. Readers can browse books, 
 ## Features
 
 - Home page with a featured-library carousel, recently added books, borrowing steps, and category links.
+- Responsive layouts for mobile, tablet, and desktop screens.
 - All-books catalogue and individual book detail pages.
 - Email/password registration and login, plus Google and GitHub sign-in.
 - Protected add-book and profile pages.
 - Book borrowing for signed-in members, with available-copy updates and duplicate active-borrow prevention.
 - Light and dark themes.
+- Warm paper-and-library-green palette with terracotta accents and coordinated elevated surfaces in light and dark themes; Inter body text and Playfair Display headings.
 - Add-book form with book details, copy count, add date, and cover-image upload UI.
 
-> **Implementation status:** My Books and My Borrows are currently placeholder pages. The borrowing API records borrows, but the UI for listing or returning them is not implemented yet.
+> **Implementation status:** My Books lists only books whose `addedByEmail` matches the signed-in member and supports editing or deleting those books. Books with an active borrow cannot be deleted. My Borrows is still a placeholder; the borrowing API records borrows, but the UI for listing or returning them is not implemented yet.
 
 ## Tech stack
 
@@ -84,6 +86,7 @@ The add-book form currently saves to this backend and also keeps a browser-local
 - Better Auth stores its data in the `book-nook-client-auth` MongoDB database.
 - The borrowing route uses the `bookstore` database, with `book-nook` for books and `book-borrows` for borrow records.
 - `POST /api/books/:id/borrow` requires a signed-in session. A successful borrow reduces `availableCopies` and sets a due date seven days later.
+- `PATCH` and `DELETE /api/my-books/:id` require a signed-in owner match. Deletion is blocked while any copies are borrowed.
 - Borrowing uses a MongoDB transaction and creates a unique index to prevent the same member from having multiple active borrows of one book. MongoDB transactions require a replica set or a compatible managed MongoDB deployment.
 - Email/password registration requires at least eight characters, including an uppercase and a lowercase letter.
 
@@ -96,7 +99,7 @@ src/
     add-book/            Protected add-book page and form
     all-books/           Catalogue and book detail pages
     login/               Login page
-    my-books/            Placeholder for a member's books
+    my-books/            Signed-in member's own books
     my-borrows/          Placeholder for borrow history
     profile/             Account and linked social providers
     register/            Registration page

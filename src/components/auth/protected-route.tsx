@@ -7,14 +7,18 @@ import { auth } from "@/lib/auth";
 export async function ProtectedRoute({
   children,
   returnTo,
+  unauthenticatedTo,
 }: {
   children: ReactNode;
   returnTo: string;
+  unauthenticatedTo?: string;
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
-    redirect(`/login?callbackURL=${encodeURIComponent(returnTo)}`);
+    redirect(
+      unauthenticatedTo ?? `/login?callbackURL=${encodeURIComponent(returnTo)}`,
+    );
   }
 
   return children;

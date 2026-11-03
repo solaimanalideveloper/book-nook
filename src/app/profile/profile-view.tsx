@@ -118,7 +118,7 @@ export function ProfileView() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-6 py-24 text-foreground">
+    <div className="flex min-h-[calc(100svh-4rem)] items-center justify-center px-4 py-20 text-foreground sm:px-6 sm:py-24">
       <Card className="w-full max-w-lg">
         <CardHeader className="items-center text-center">
           <span className="grid size-12 place-items-center rounded-xl bg-primary text-primary-foreground">
@@ -134,9 +134,9 @@ export function ProfileView() {
             <>
               <div className="rounded-lg border border-border bg-muted/40 p-4 text-left">
                 <p className="text-sm text-muted-foreground">Name</p>
-                <p className="text-lg font-semibold">{user.name}</p>
+                <p className="break-words text-lg font-semibold">{user.name}</p>
                 <p className="mt-4 text-sm text-muted-foreground">Email</p>
-                <p className="text-base">{user.email}</p>
+                <p className="break-all text-base">{user.email}</p>
               </div>
 
               <div className="flex flex-col gap-3">
