@@ -202,16 +202,58 @@ export async function DELETE(request: Request, { params }: RouteContext) {
       );
     }
 
-    const deleteResult = await books.deleteOne({
-      ...ownerFilter,
-      totalCopies: book.totalCopies,
-      availableCopies: book.availableCopies,
-    });
+    const backendResponse = await fetch(
+      `http://localhost:8000/all-books/${encodeURIComponent(id)}`,
+      { method: "DELETE", cache: "no-store" },
+    );
+    let backendResult: unknown;
+    try {
+      backendResult = await backendResponse.json();
+    } catch {
+      return Response.json(
+        { error: "The books API returned an invalid response." },
+        { status: 502 },
+      );
+    }
 
-    if (deleteResult.deletedCount === 0) {
+    if (!backendResponse.ok) {
+      const backendError =
+        typeof backendResult === "object" &&
+        backendResult !== null &&
+        "error" in backendResult &&
+        typeof backendResult.error === "string"
+          ? backendResult.error
+          : `The books API responded with status ${backendResponse.status}.`;
+
+      return Response.json(
+        { error: backendError },
+        { status: backendResponse.status === 404 ? 404 : 502 },
+      );
+    }
+
+    if (
+      typeof backendResult !== "object" ||
+      backendResult === null ||
+      !("deletedCount" in backendResult) ||
+      typeof backendResult.deletedCount !== "number"
+    ) {
+      return Response.json(
+        { error: "The books API returned an invalid delete result." },
+        { status: 502 },
+      );
+    }
+
+    if (backendResult.deletedCount === 0) {
       return Response.json(
         { error: "The book changed while you were deleting it. Refresh and try again." },
         { status: 409 },
+      );
+    }
+
+    if (backendResult.deletedCount !== 1) {
+      return Response.json(
+        { error: "The books API returned an invalid delete result." },
+        { status: 502 },
       );
     }
 

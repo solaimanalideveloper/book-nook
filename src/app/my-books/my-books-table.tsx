@@ -8,6 +8,17 @@ import { BookOpenIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -74,6 +85,7 @@ function BookRow({
   onDeleted: (id: string) => void;
 }) {
   const [isEditing, setIsEditing] = React.useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [values, setValues] = React.useState<EditValues>({
@@ -142,8 +154,6 @@ function BookRow({
   }
 
   async function handleDelete() {
-    if (!window.confirm(`Delete "${book.title}" from your books?`)) return;
-
     setIsDeleting(true);
     try {
       const response = await fetch(`/api/my-books/${encodeURIComponent(book._id)}`, {
@@ -158,6 +168,7 @@ function BookRow({
       }
 
       onDeleted(book._id);
+      setIsDeleteDialogOpen(false);
       toast.success("Book deleted.");
     } catch (error) {
       const message =
@@ -345,16 +356,47 @@ function BookRow({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={() => void handleDelete()}
-            disabled={isDeleting}
+          <AlertDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={(open) => {
+              if (!isDeleting) setIsDeleteDialogOpen(open);
+            }}
           >
-            <Trash2Icon />
-            {isDeleting ? "Deleting..." : "Delete"}
-          </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={isDeleting}
+            >
+              <Trash2Icon />
+              Delete
+            </Button>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogMedia>
+                  <Trash2Icon className="text-destructive" />
+                </AlertDialogMedia>
+                <AlertDialogTitle>Delete this book?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete “{book.title}” from your
+                  books? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => void handleDelete()}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete book"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </td>
     </tr>
