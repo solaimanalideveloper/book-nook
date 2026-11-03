@@ -78,20 +78,39 @@ export function AddBookForm() {
         method: "POST",
         body: uploadForm,
       });
-      const uploadResult = (await uploadResponse.json()) as {
-        imageUrl?: string;
-        error?: string;
-      };
+      let uploadResult: unknown;
+      try {
+        uploadResult = await uploadResponse.json();
+      } catch {
+        throw new Error(
+          `Image upload service returned invalid JSON (HTTP ${uploadResponse.status}).`,
+        );
+      }
 
-      if (!uploadResponse.ok || !uploadResult.imageUrl) {
-        throw new Error(uploadResult.error || "Could not upload the cover image.");
+      const uploadError =
+        typeof uploadResult === "object" &&
+        uploadResult !== null &&
+        "error" in uploadResult &&
+        typeof uploadResult.error === "string"
+          ? uploadResult.error
+          : null;
+      const imageUrl =
+        typeof uploadResult === "object" &&
+        uploadResult !== null &&
+        "imageUrl" in uploadResult &&
+        typeof uploadResult.imageUrl === "string"
+          ? uploadResult.imageUrl
+          : null;
+
+      if (!uploadResponse.ok || !imageUrl) {
+        throw new Error(uploadError || "Could not upload the cover image.");
       }
 
       const book: Book = {
         title: form.title.trim(),
         author: form.author.trim(),
         category: form.category,
-        image: uploadResult.imageUrl,
+        image: imageUrl,
         description: form.description.trim(),
         totalCopies: Math.max(1, Number(form.totalCopies) || 1),
         availableCopies: Math.max(1, Number(form.totalCopies) || 1),

@@ -1,46 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BookNook
 
-## Getting Started
+BookNook is a neighbourhood book-sharing application. Readers can browse books, view availability, and borrow a copy for seven days. Signed-in members can also add books to the shared catalogue.
 
-First, run the development server:
+## Features
+
+- Home page with a featured-library carousel, recently added books, borrowing steps, and category links.
+- All-books catalogue and individual book detail pages.
+- Email/password registration and login, plus Google and GitHub sign-in.
+- Protected add-book and profile pages.
+- Book borrowing for signed-in members, with available-copy updates and duplicate active-borrow prevention.
+- Light and dark themes.
+- Add-book form with book details, copy count, add date, and cover-image upload UI.
+
+> **Implementation status:** My Books and My Borrows are currently placeholder pages. The borrowing API records borrows, but the UI for listing or returning them is not implemented yet.
+
+## Tech stack
+
+- Next.js 16 App Router
+- React 19 and TypeScript
+- Tailwind CSS v4
+- shadcn/ui components using Base UI primitives
+- Better Auth with MongoDB
+- MongoDB driver
+
+## Getting started
+
+### Requirements
+
+- Node.js compatible with the installed Next.js version
+- npm
+- MongoDB for authentication and borrowing
+- The separate books backend described below
+
+### Install and run
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Add Book setup
+### Environment variables
 
-The Add Book form uploads cover images to ImgBB and saves books through the backend at `http://localhost:8000/add-books`. Create a `.env.local` file in the project root and add your ImgBB API key:
+Create a `.env.local` file in the project root for MongoDB and OAuth sign-in:
 
 ```env
-IMGBB_API_KEY=your_imgbb_api_key
+MONGODB_ADAPTER_URL=mongodb+srv://<username>:<password>@<cluster>/<database>
+IMGBB_API_KEY=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
 ```
 
-Keep this key server-side; do not rename it to a `NEXT_PUBLIC_` variable. Restart the Next.js dev server after setting it.
+Add an ImgBB API key to enable book-cover uploads. Keep credentials server-side. Do not add a `NEXT_PUBLIC_` prefix to these values. Configure the matching callback URLs in the Google and GitHub OAuth applications for the local and deployed app URLs.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The `POST /api/upload-image` route accepts an image in multipart form data under the `image` field and returns an `imageUrl`. It requires a signed-in session and uploads the file to ImgBB using the server-side `IMGBB_API_KEY`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Books backend
 
-## Learn More
+Book catalogue requests currently use a separately running backend at `http://localhost:8000`. Start that service separately; it is not included in this repository.
 
-To learn more about Next.js, take a look at the following resources:
+The frontend expects these endpoints:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/all-books` | Return an array of books |
+| `GET` | `/all-books/:id` | Return one book, or `404` if it does not exist |
+| `POST` | `/add-books` | Save a book as JSON |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Book records are expected to contain:
 
-## Deploy on Vercel
+```text
+_id, title, author, category, image, description,
+totalCopies, availableCopies, addedBy, addedByEmail, createdAt
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The add-book form currently saves to this backend and also keeps a browser-local copy. If the backend save fails, the form reports that it was saved locally; that local copy is not used by the server-rendered catalogue.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Borrowing and authentication data
+
+- Better Auth stores its data in the `book-nook-client-auth` MongoDB database.
+- The borrowing route uses the `bookstore` database, with `book-nook` for books and `book-borrows` for borrow records.
+- `POST /api/books/:id/borrow` requires a signed-in session. A successful borrow reduces `availableCopies` and sets a due date seven days later.
+- Borrowing uses a MongoDB transaction and creates a unique index to prevent the same member from having multiple active borrows of one book. MongoDB transactions require a replica set or a compatible managed MongoDB deployment.
+- Email/password registration requires at least eight characters, including an uppercase and a lowercase letter.
+
+## Project structure
+
+```text
+src/
+  app/
+    api/                 Auth and borrowing route handlers
+    add-book/            Protected add-book page and form
+    all-books/           Catalogue and book detail pages
+    login/               Login page
+    my-books/            Placeholder for a member's books
+    my-borrows/          Placeholder for borrow history
+    profile/             Account and linked social providers
+    register/            Registration page
+  components/
+    auth/                Authentication form and route protection
+    books/               Reusable book card
+    home/                Home page sections
+    layout/              Navigation and footer
+    theme/               Theme provider and toggle
+    ui/                  Reusable UI primitives
+  lib/                   Auth setup, book types, and utilities
+```
+
+## Available commands
+
+```bash
+npm run dev       # Start the development server
+npm run build     # Create a production build
+npm run start     # Run the production server
+npm run lint      # Run ESLint
+npx tsc --noEmit  # Check TypeScript types
+```
+
+There is currently no test framework configured in the project.
