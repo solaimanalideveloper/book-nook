@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  images: {
+    // Book covers come from user-supplied URLs (e.g. openlibrary.org);
+    // allow any https host so remote covers render everywhere.
+    remotePatterns: [{ protocol: "https", hostname: "**" }],
+  },
   turbopack: {
     rules: {
       "*.css": {

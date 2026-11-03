@@ -24,10 +24,6 @@ export const CATEGORIES = [
   "Science",
   "History",
   "Kids",
-  "Mystery",
-  "Self-Help",
-  "Travel",
-  "Art",
   "Others",
 ] as const;
 
