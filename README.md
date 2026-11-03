@@ -71,6 +71,8 @@ The frontend expects these endpoints:
 | `GET` | `/all-books` | Return an array of books |
 | `GET` | `/all-books/:id` | Return one book, or `404` if it does not exist |
 | `POST` | `/add-books` | Save a book as JSON |
+| `POST` | `/borrow-book/:id` | Decrement a book's available copies |
+| `DELETE` | `/borrowed-books/:id` | Return a borrowed book and increment its available copies |
 | `PATCH` | `/all-books/:id` | Update a book from JSON and return the MongoDB update result |
 | `DELETE` | `/all-books/:id` | Delete a book by ID and return the MongoDB delete result |
 
@@ -88,9 +90,9 @@ The Books backend initializes new books with all `totalCopies` available. Borrow
 
 - Better Auth stores its data in the `book-nook-client-auth` MongoDB database.
 - The borrowing route uses the `bookstore` database, with `book-nook` for books and `book-borrows` for borrow records.
-- `POST /api/books/:id/borrow` requires a signed-in session. A successful borrow reduces `availableCopies` and sets a due date seven days later.
+- `POST /api/books/:id/borrow` requires a signed-in session, reserves one active borrow per member/book, and forwards the copy decrement to the Books backend's `POST /borrow-book/:id` endpoint. `POST /api/books/:id/return` verifies the active borrow and forwards the copy increment to `DELETE /borrowed-books/:id`.
 - `PATCH` and `DELETE /api/my-books/:id` require a signed-in owner match. The PATCH route forwards validated book updates to the books backend and preserves the number of copies already borrowed. The DELETE route forwards deletion to the books backend and blocks deletion while any copies are borrowed.
-- Borrowing uses a MongoDB transaction and creates a unique index to prevent the same member from having multiple active borrows of one book. MongoDB transactions require a replica set or a compatible managed MongoDB deployment.
+- Borrowing creates a unique index to prevent the same member from having multiple active borrows of one book.
 - Email/password registration requires at least eight characters, including an uppercase and a lowercase letter.
 
 ## Project structure

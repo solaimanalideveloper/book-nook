@@ -105,8 +105,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       }
 
       if (isRegister) {
-        toast.success("Account created. Please log in.");
-        router.replace(`/login?callbackURL=${encodeURIComponent(returnPath)}`);
+        toast.success("Account created.");
+        router.replace("/");
       } else {
         toast.success("Logged in successfully.");
         if (hasAccountNotLinked) {

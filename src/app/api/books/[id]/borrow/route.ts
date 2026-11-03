@@ -17,12 +17,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "Invalid book ID." }, { status: 400 });
   }
 
-  const mongoSession = client.startSession();
+  const books = client.db("bookstore").collection("book-nook");
+  const borrows = client.db("bookstore").collection("book-borrows");
   const bookId = new ObjectId(id);
-  let borrowedBookTitle = "";
+  let reservationId: ObjectId | null = null;
 
   try {
-    const borrows = client.db("bookstore").collection("book-borrows");
     await borrows.createIndex(
       { bookId: 1, userId: 1, status: 1 },
       {
@@ -32,84 +32,63 @@ export async function POST(request: Request, { params }: RouteContext) {
       },
     );
 
-    await mongoSession.withTransaction(async () => {
-      const book = await client
-        .db("bookstore")
-        .collection("book-nook")
-        .findOneAndUpdate(
-          {
-            _id: bookId,
-            $expr: {
-              $gt: [
-                {
-                  $convert: {
-                    input: { $ifNull: ["$availableCopies", "$totalCopies"] },
-                    to: "int",
-                    onError: 0,
-                    onNull: 0,
-                  },
-                },
-                0,
-              ],
-            },
-          },
-          [
-            {
-              $set: {
-                availableCopies: {
-                  $subtract: [
-                    {
-                      $convert: {
-                        input: { $ifNull: ["$availableCopies", "$totalCopies"] },
-                        to: "int",
-                        onError: 0,
-                        onNull: 0,
-                      },
-                    },
-                    1,
-                  ],
-                },
-              },
-            },
-          ],
-          { session: mongoSession },
-        );
+    const book = await books.findOne(
+      { _id: bookId },
+      { projection: { title: 1 } },
+    );
+    if (!book) {
+      return Response.json({ error: "Book not found." }, { status: 404 });
+    }
 
-      if (!book) {
-        throw new Error("BOOK_UNAVAILABLE");
+    const borrowedAt = new Date();
+    const dueAt = new Date(borrowedAt);
+    dueAt.setDate(dueAt.getDate() + 7);
+
+    const reservation = await borrows.insertOne({
+      bookId: bookId.toHexString(),
+      bookTitle: book.title,
+      userId: session.user.id,
+      userName: session.user.name,
+      userEmail: session.user.email,
+      borrowedAt,
+      dueAt,
+      status: "borrowed",
+    });
+    reservationId = reservation.insertedId;
+
+    const backendResponse = await fetch(
+      `http://localhost:8000/borrow-book/${encodeURIComponent(id)}`,
+      { method: "POST", cache: "no-store" },
+    );
+
+    if (!backendResponse.ok) {
+      let backendError = `The books API responded with status ${backendResponse.status}.`;
+      try {
+        const backendResult: unknown = await backendResponse.json();
+        if (
+          typeof backendResult === "object" &&
+          backendResult !== null &&
+          "error" in backendResult &&
+          typeof backendResult.error === "string"
+        ) {
+          backendError = backendResult.error;
+        }
+      } catch {
+        // Keep the status-based error when the backend response is not JSON.
       }
 
-      borrowedBookTitle = book.title;
-      const borrowedAt = new Date();
-      const dueAt = new Date(borrowedAt);
-      dueAt.setDate(dueAt.getDate() + 7);
-
-      await borrows.insertOne(
-          {
-            bookId: bookId.toHexString(),
-            bookTitle: book.title,
-            userId: session.user.id,
-            userName: session.user.name,
-            userEmail: session.user.email,
-            borrowedAt,
-            dueAt,
-            status: "borrowed",
-          },
-          { session: mongoSession },
-        );
-    });
-
-    return Response.json({
-      message: `You borrowed "${borrowedBookTitle}".`,
-    });
-  } catch (error) {
-    if (error instanceof Error && error.message === "BOOK_UNAVAILABLE") {
+      await borrows.deleteOne({ _id: reservationId });
+      reservationId = null;
       return Response.json(
-        { error: "This book is unavailable or has no copies left." },
-        { status: 409 },
+        { error: backendError },
+        { status: backendResponse.status === 404 ? 404 : 409 },
       );
     }
 
+    return Response.json({
+      message: `You borrowed "${book.title}".`,
+    });
+  } catch (error) {
     if (
       typeof error === "object" &&
       error !== null &&
@@ -122,12 +101,18 @@ export async function POST(request: Request, { params }: RouteContext) {
       );
     }
 
+    if (reservationId) {
+      try {
+        await borrows.deleteOne({ _id: reservationId });
+      } catch (cleanupError) {
+        console.error("Could not clear failed book borrow:", cleanupError);
+      }
+    }
+
     console.error("Could not save book borrow:", error);
     return Response.json(
       { error: "Could not borrow this book. Please try again." },
       { status: 500 },
     );
-  } finally {
-    await mongoSession.endSession();
   }
 }

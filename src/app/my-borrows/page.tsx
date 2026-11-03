@@ -9,6 +9,7 @@ import { ObjectId } from "mongodb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ReturnBookButton } from "@/app/my-borrows/return-book-button";
 import { auth, client } from "@/lib/auth";
 import { formatDate } from "@/lib/books";
 
@@ -160,6 +161,7 @@ async function MyBorrowsContent() {
                     >
                       View book
                     </Button>
+                    <ReturnBookButton bookId={borrow.bookId} />
                   </div>
                 </Card>
               );

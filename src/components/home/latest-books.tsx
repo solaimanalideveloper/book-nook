@@ -70,7 +70,11 @@ async function LatestBooksGrid() {
 
 export function LatestBooks() {
   return (
-    <section aria-labelledby="latest-books-heading" className="py-14 sm:py-20 lg:py-24">
+    <section
+      id="latest-books"
+      aria-labelledby="latest-books-heading"
+      className="py-14 sm:py-20 lg:py-24"
+    >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         <div className="mb-10 text-center">
           <h2

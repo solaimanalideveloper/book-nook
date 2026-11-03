@@ -3,6 +3,7 @@
 import * as React from "react";
 import { BookOpenIcon, CalendarIcon } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ const initialForm = {
 };
 
 export function AddBookForm() {
+  const router = useRouter();
   const [form, setForm] = React.useState(initialForm);
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const [imagePreview, setImagePreview] = React.useState("");
@@ -146,6 +148,7 @@ export function AddBookForm() {
       if (serverSaved) {
         saveBook(book);
         toast.success("Book added successfully.");
+        router.replace("/#latest-books");
       }
 
       setForm(initialForm);

@@ -1,5 +1,4 @@
 import { ObjectId } from "mongodb";
-
 import { CATEGORIES } from "@/lib/books";
 import { auth, client } from "@/lib/auth";
 
@@ -206,6 +205,7 @@ export async function DELETE(request: Request, { params }: RouteContext) {
       `http://localhost:8000/all-books/${encodeURIComponent(id)}`,
       { method: "DELETE", cache: "no-store" },
     );
+
     let backendResult: unknown;
     try {
       backendResult = await backendResponse.json();

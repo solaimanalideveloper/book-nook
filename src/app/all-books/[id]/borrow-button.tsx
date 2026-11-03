@@ -41,7 +41,7 @@ export function BorrowButton({
       }
 
       toast.success(result.message || "Book borrowed successfully.");
-      router.refresh();
+      router.replace("/my-borrows");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -62,7 +62,7 @@ export function BorrowButton({
         : isBorrowing
           ? "Borrowing..."
           : availableCopies < 1
-            ? "Unavailable"
+            ? "Not Available"
             : "Borrow This Book"}
     </Button>
   );

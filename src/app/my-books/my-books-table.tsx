@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { BookOpenIcon, PencilIcon, Trash2Icon } from "lucide-react";
 
@@ -77,13 +78,10 @@ function getErrorMessage(result: unknown): string | null {
 
 function BookRow({
   book,
-  onUpdated,
-  onDeleted,
 }: {
   book: MyBook;
-  onUpdated: (book: MyBook) => void;
-  onDeleted: (id: string) => void;
 }) {
+  const router = useRouter();
   const [isEditing, setIsEditing] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -140,10 +138,8 @@ function BookRow({
         throw new Error("The server returned an invalid book response.");
       }
 
-      const updatedBook = result.book as MyBook;
-      onUpdated(updatedBook);
-      setIsEditing(false);
       toast.success("Book updated.");
+      router.replace(`/all-books/${encodeURIComponent(book._id)}`);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -167,9 +163,8 @@ function BookRow({
         );
       }
 
-      onDeleted(book._id);
-      setIsDeleteDialogOpen(false);
       toast.success("Book deleted.");
+      router.replace("/all-books");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -404,20 +399,6 @@ function BookRow({
 }
 
 export function MyBooksTable({ initialBooks }: { initialBooks: MyBook[] }) {
-  const [books, setBooks] = React.useState(initialBooks);
-
-  function updateBook(updatedBook: MyBook) {
-    setBooks((current) =>
-      current.map((book) =>
-        book._id === updatedBook._id ? updatedBook : book,
-      ),
-    );
-  }
-
-  function removeBook(id: string) {
-    setBooks((current) => current.filter((book) => book._id !== id));
-  }
-
   return (
     <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full min-w-[640px] border-collapse text-left text-sm">
@@ -438,13 +419,8 @@ export function MyBooksTable({ initialBooks }: { initialBooks: MyBook[] }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {books.map((book) => (
-            <BookRow
-              key={book._id}
-              book={book}
-              onUpdated={updateBook}
-              onDeleted={removeBook}
-            />
+          {initialBooks.map((book) => (
+            <BookRow key={book._id} book={book} />
           ))}
         </tbody>
       </table>
