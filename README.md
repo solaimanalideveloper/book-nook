@@ -90,7 +90,7 @@ The Books backend initializes new books with all `totalCopies` available. Borrow
 
 - Better Auth stores its data in the `book-nook-client-auth` MongoDB database.
 - The borrowing route uses the `bookstore` database, with `book-nook` for books and `book-borrows` for borrow records.
-- `POST /api/books/:id/borrow` requires a signed-in session, reserves one active borrow per member/book, and forwards the copy decrement to the Books backend's `POST /borrow-book/:id` endpoint. `POST /api/books/:id/return` verifies the active borrow and forwards the copy increment to `DELETE /borrowed-books/:id`.
+- `POST /api/books/:id/borrow` requires a signed-in session, reserves one active borrow per member/book, and forwards the copy decrement to the Books backend's `POST /borrow-book/:id` endpoint. `POST /api/books/:id/return` verifies the active borrow, forwards the copy increment to `DELETE /borrowed-books/:id`, and deletes the borrow record after the backend succeeds.
 - `PATCH` and `DELETE /api/my-books/:id` require a signed-in owner match. The PATCH route forwards validated book updates to the books backend and preserves the number of copies already borrowed. The DELETE route forwards deletion to the books backend and blocks deletion while any copies are borrowed.
 - Borrowing creates a unique index to prevent the same member from having multiple active borrows of one book.
 - Email/password registration requires at least eight characters, including an uppercase and a lowercase letter.

@@ -76,17 +76,13 @@ export async function POST(request: Request, { params }: RouteContext) {
       );
     }
 
-    const completed = await borrows.updateOne(
+    const completed = await borrows.deleteOne(
       { ...activeBorrow, returnInProgress: true },
-      {
-        $set: { status: "returned", returnedAt: new Date() },
-        $unset: { returnInProgress: "" },
-      },
     );
-    if (completed.matchedCount === 0) {
-      console.error("Book was returned but its borrow record could not be updated:", id);
+    if (completed.deletedCount !== 1) {
+      console.error("Book was returned but its borrow record could not be deleted:", id);
       return Response.json(
-        { error: "The book was returned, but your borrow record could not be updated." },
+        { error: "The book was returned, but your borrow record could not be deleted." },
         { status: 500 },
       );
     }
