@@ -1,13 +1,32 @@
 import { betterAuth } from "better-auth";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
 const client = new MongoClient(process.env.MONGODB_ADAPTER_URL as string);
-const db = client.db();
+const db = client.db("book-nook-client-auth");
 
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
+    autoSignIn: false,
+    minPasswordLength: 8,
+    requireEmailVerification: false,
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") return;
+
+      const body = ctx.body as { password?: unknown };
+      if (typeof body.password !== "string") return;
+
+      if (!/[A-Z]/.test(body.password) || !/[a-z]/.test(body.password)) {
+        throw new APIError("BAD_REQUEST", {
+          message:
+            "Password must include at least one uppercase and one lowercase letter.",
+        });
+      }
+    }),
   },
   socialProviders: {
     github: {

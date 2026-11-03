@@ -3,7 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
@@ -18,10 +19,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 
+function getPasswordError(password: string): string {
+  if (password.length < 8) return "Password must be at least 8 characters.";
+  if (!/[A-Z]/.test(password)) {
+    return "Password must include at least one uppercase letter.";
+  }
+  if (!/[a-z]/.test(password)) {
+    return "Password must include at least one lowercase letter.";
+  }
+  return "";
+}
+
+function getSafeReturnPath(value: string | null): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
+    return "/";
+  }
+  return value;
+}
+
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const isRegister = mode === "register";
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnPath = getSafeReturnPath(searchParams.get("callbackURL"));
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
+  const [passwordError, setPasswordError] = React.useState("");
   const [socialProvider, setSocialProvider] = React.useState<
     "google" | "github" | null
   >(null);
@@ -33,6 +56,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const form = new FormData(event.currentTarget);
     const name = String(form.get("name") ?? "").trim();
     const email = String(form.get("email") ?? "").trim();
+    const image = String(form.get("image") ?? "").trim();
     const password = String(form.get("password") ?? "");
 
     if (isRegister && !name) {
@@ -50,9 +74,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters long.");
-      return;
+    if (isRegister) {
+      const error = getPasswordError(password);
+      setPasswordError(error);
+      if (error) return;
     }
 
     setIsSubmitting(true);
@@ -63,12 +88,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             name,
             email,
             password,
-            callbackURL: "/profile",
+            image: image || undefined,
           })
         : await authClient.signIn.email({
             email,
             password,
-            callbackURL: "/profile",
+            callbackURL: returnPath,
           });
 
       if (result.error) {
@@ -76,8 +101,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         return;
       }
 
-      toast.success(isRegister ? "Account created." : "Logged in successfully.");
-      router.push("/profile");
+      if (isRegister) {
+        toast.success("Account created. Please log in.");
+        router.replace(`/login?callbackURL=${encodeURIComponent(returnPath)}`);
+      } else {
+        toast.success("Logged in successfully.");
+        router.replace(returnPath);
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -93,7 +123,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     try {
       const result = await authClient.signIn.social({
         provider,
-        callbackURL: "/profile",
+        callbackURL: returnPath,
       });
 
       if (result.error) {
@@ -122,7 +152,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {isRegister && (
             <div className="grid gap-2">
-              <Label htmlFor="name">Full name</Label>
+              <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" autoComplete="name" required />
             </div>
           )}
@@ -136,18 +166,59 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               required
             />
           </div>
+          {isRegister && (
+            <div className="grid gap-2">
+              <Label htmlFor="image">Photo URL</Label>
+              <Input
+                id="image"
+                name="image"
+                type="url"
+                autoComplete="url"
+                placeholder="https://example.com/photo.jpg"
+              />
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete={isRegister ? "new-password" : "current-password"}
-              minLength={8}
-              required
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={isPasswordVisible ? "text" : "password"}
+                autoComplete={isRegister ? "new-password" : "current-password"}
+                className="pr-10"
+                required
+                aria-invalid={Boolean(passwordError)}
+                aria-describedby={passwordError ? "password-error" : undefined}
+                onChange={(event) => {
+                  if (isRegister) {
+                    setPasswordError(getPasswordError(event.currentTarget.value));
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute top-0 right-0"
+                aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                aria-pressed={isPasswordVisible}
+                onClick={() => setIsPasswordVisible((visible) => !visible)}
+              >
+                {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
+              </Button>
+            </div>
+            {passwordError && (
+              <p id="password-error" className="text-sm text-destructive">
+                {passwordError}
+              </p>
+            )}
           </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting || socialProvider !== null}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting || socialProvider !== null}
+          >
             {isSubmitting
               ? "Please wait..."
               : isRegister
@@ -158,7 +229,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             {isRegister ? "Already registered?" : "New to BookNook?"}{" "}
             <Link
               className="font-medium text-primary underline-offset-4 hover:underline"
-              href={isRegister ? "/login" : "/register"}
+              href={
+                isRegister
+                  ? "/login"
+                  : returnPath === "/"
+                    ? "/register"
+                    : `/register?callbackURL=${encodeURIComponent(returnPath)}`
+              }
             >
               {isRegister ? "Login" : "Create an account"}
             </Link>
@@ -167,7 +244,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
         <div className="my-5 flex items-center gap-3">
           <span className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">or continue with</span>
+          <span className="text-xs text-muted-foreground">
+            or continue with
+          </span>
           <span className="h-px flex-1 bg-border" />
         </div>
 
@@ -186,7 +265,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           </Button>
           <Button
             type="button"
-            className="h-10 w-full gap-3 bg-[#24292f] text-white hover:bg-[#24292f]/90"
+            variant="outline"
+            className="h-10 w-full gap-3 bg-muted/50"
             disabled={isSubmitting || socialProvider !== null}
             onClick={() => handleSocialSignIn("github")}
           >
@@ -195,7 +275,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               alt=""
               width={18}
               height={18}
-              className="brightness-0 invert"
+              className="dark:invert"
             />
             {socialProvider === "github"
               ? "Connecting..."
