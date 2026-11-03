@@ -102,29 +102,47 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       );
     }
 
-    const updateResult = await books.updateOne(
+    const availableCopies = totalCopies - borrowedCopies;
+    const backendResponse = await fetch(
+      `http://localhost:8000/all-books/${encodeURIComponent(id)}`,
       {
-        ...ownerFilter,
-        totalCopies: book.totalCopies,
-        availableCopies: book.availableCopies,
-      },
-      {
-        $set: {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           title,
           author,
           category,
           description,
           totalCopies,
-          availableCopies: totalCopies - borrowedCopies,
-        },
+          availableCopies,
+        }),
+        cache: "no-store",
       },
     );
+    const backendResult: unknown = await backendResponse.json();
 
-    if (updateResult.matchedCount === 0) {
+    if (!backendResponse.ok) {
       return Response.json(
-        { error: "The book changed while you were editing. Refresh and try again." },
-        { status: 409 },
+        {
+          error:
+            typeof backendResult === "object" &&
+            backendResult !== null &&
+            "error" in backendResult &&
+            typeof backendResult.error === "string"
+              ? backendResult.error
+              : `The books API responded with status ${backendResponse.status}.`,
+        },
+        { status: backendResponse.status === 404 ? 404 : 502 },
       );
+    }
+
+    if (
+      typeof backendResult === "object" &&
+      backendResult !== null &&
+      "matchedCount" in backendResult &&
+      backendResult.matchedCount === 0
+    ) {
+      return Response.json({ error: "Book not found." }, { status: 404 });
     }
 
     return Response.json({
@@ -136,7 +154,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         description,
         image: typeof book.image === "string" ? book.image : "",
         totalCopies,
-        availableCopies: totalCopies - borrowedCopies,
+        availableCopies,
         addedByEmail: session.user.email,
       },
     });

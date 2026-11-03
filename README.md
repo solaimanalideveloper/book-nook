@@ -71,6 +71,7 @@ The frontend expects these endpoints:
 | `GET` | `/all-books` | Return an array of books |
 | `GET` | `/all-books/:id` | Return one book, or `404` if it does not exist |
 | `POST` | `/add-books` | Save a book as JSON |
+| `PATCH` | `/all-books/:id` | Update a book from JSON and return the MongoDB update result |
 
 Book records are expected to contain:
 
@@ -86,7 +87,7 @@ The add-book form currently saves to this backend and also keeps a browser-local
 - Better Auth stores its data in the `book-nook-client-auth` MongoDB database.
 - The borrowing route uses the `bookstore` database, with `book-nook` for books and `book-borrows` for borrow records.
 - `POST /api/books/:id/borrow` requires a signed-in session. A successful borrow reduces `availableCopies` and sets a due date seven days later.
-- `PATCH` and `DELETE /api/my-books/:id` require a signed-in owner match. Deletion is blocked while any copies are borrowed.
+- `PATCH` and `DELETE /api/my-books/:id` require a signed-in owner match. The PATCH route forwards validated book updates to the books backend and preserves the number of copies already borrowed. Deletion is blocked while any copies are borrowed.
 - Borrowing uses a MongoDB transaction and creates a unique index to prevent the same member from having multiple active borrows of one book. MongoDB transactions require a replica set or a compatible managed MongoDB deployment.
 - Email/password registration requires at least eight characters, including an uppercase and a lowercase letter.
 

@@ -99,14 +99,17 @@ function BookRow({
     setIsSaving(true);
 
     try {
-      const response = await fetch(`/api/my-books/${encodeURIComponent(book._id)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
-          totalCopies: Number(values.totalCopies),
-        }),
-      });
+      const response = await fetch(
+        `/api/my-books/${encodeURIComponent(book._id)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...values,
+            totalCopies: Number(values.totalCopies),
+          }),
+        },
+      );
       const result: unknown = await response.json();
 
       if (!response.ok) {
