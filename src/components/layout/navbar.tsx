@@ -11,7 +11,7 @@ import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { getStoredUser } from "@/lib/user-session";
+import { authClient } from "@/lib/auth-client";
 
 /** Pages only members can see after login */
 const PUBLIC_LINKS = [
@@ -24,20 +24,17 @@ export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const [user, setUser] = React.useState(() => getStoredUser());
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     const raf = requestAnimationFrame(onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
-    const syncUser = () => setUser(getStoredUser());
-    syncUser();
-    window.addEventListener("storage", syncUser);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("storage", syncUser);
     };
   }, []);
 

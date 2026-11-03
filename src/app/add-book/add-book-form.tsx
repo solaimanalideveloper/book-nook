@@ -24,7 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { type Book, CATEGORIES, formatDate, saveBook } from "@/lib/books";
-import { getStoredUser } from "@/lib/user-session";
+import { authClient } from "@/lib/auth-client";
 
 const initialForm = {
   title: "",
@@ -39,16 +39,13 @@ export function AddBookForm() {
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const [imagePreview, setImagePreview] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [user, setUser] = React.useState(() => getStoredUser());
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
   const imageFileRef = React.useRef<HTMLInputElement>(null);
 
   const [addDate, setAddDate] = React.useState<Date>(new Date());
   const [dateOpen, setDateOpen] = React.useState(false);
   const today = React.useMemo(() => new Date(), []);
-
-  React.useEffect(() => {
-    setUser(getStoredUser());
-  }, []);
 
   React.useEffect(() => {
     if (!imagePreview) return;

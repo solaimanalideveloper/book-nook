@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { UserRoundIcon } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -13,23 +14,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { clearStoredUser, getStoredUser } from "@/lib/user-session";
+import { authClient } from "@/lib/auth-client";
 
 export default function ProfilePage() {
-  const [user, setUser] = React.useState(() => getStoredUser());
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
 
-  const refreshUser = () => setUser(getStoredUser());
+  const handleLogout = async () => {
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        toast.error(result.error.message || "Could not log out.");
+        return;
+      }
 
-  React.useEffect(() => {
-    const handleStorage = () => refreshUser();
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, []);
-
-  const handleLogout = () => {
-    clearStoredUser();
-    refreshUser();
-    toast.success("Logged out successfully.");
+      toast.success("Logged out successfully.");
+      router.push("/");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Please try again.";
+      toast.error(`Could not log out: ${message}`);
+    }
   };
 
   return (
@@ -41,7 +47,11 @@ export default function ProfilePage() {
           </span>
           <CardTitle className="text-2xl">My Profile</CardTitle>
           <CardDescription>
-            {user ? "Your account details are ready to use." : "Please log in to continue."}
+            {isPending
+              ? "Loading your account..."
+              : user
+                ? "Your account details."
+                : "Please log in to continue."}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-5">
@@ -54,11 +64,15 @@ export default function ProfilePage() {
                 <p className="text-base">{user.email}</p>
               </div>
 
-              <Button type="button" onClick={handleLogout} className="w-full">
+              <Button
+                type="button"
+                onClick={handleLogout}
+                className="w-full"
+              >
                 Logout
               </Button>
             </>
-          ) : (
+          ) : !isPending ? (
             <>
               <Button
                 nativeButton={false}
@@ -76,7 +90,7 @@ export default function ProfilePage() {
                 Create an Account
               </Button>
             </>
-          )}
+          ) : null}
         </CardContent>
       </Card>
     </div>
