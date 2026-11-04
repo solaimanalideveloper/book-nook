@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import { BookOpenIcon } from "lucide-react";
+import { auth } from "@/lib/auth";
 
 import { BorrowButton } from "@/app/all-books/[id]/borrow-button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +34,13 @@ export default async function BookDetailsPage({
   params,
 }: PageProps<"/all-books/[id]">) {
   const { id } = await params;
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect(
+      `/register?callbackURL=${encodeURIComponent(`/all-books/${id}`)}`,
+    );
+  }
+
   const response = await fetch(
     `http://localhost:8000/all-books/${encodeURIComponent(id)}`,
     { cache: "no-store" },

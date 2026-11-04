@@ -194,9 +194,20 @@ export async function DELETE(request: Request, { params }: RouteContext) {
     const totalCopies = getCopies(book.totalCopies);
     const availableCopies = getCopies(book.availableCopies, totalCopies);
 
-    if (activeBorrows > 0 || availableCopies !== totalCopies) {
+    if (activeBorrows > 0) {
       return Response.json(
-        { error: "This book cannot be deleted while copies are borrowed." },
+        {
+          error: `This book has ${activeBorrows} active borrow${activeBorrows === 1 ? "" : "s"}. Return all borrowed copies before deleting it.`,
+        },
+        { status: 409 },
+      );
+    }
+
+    if (availableCopies !== totalCopies) {
+      return Response.json(
+        {
+          error: `Only ${availableCopies} of ${totalCopies} copies are available. Return all borrowed copies before deleting this book.`,
+        },
         { status: 409 },
       );
     }
