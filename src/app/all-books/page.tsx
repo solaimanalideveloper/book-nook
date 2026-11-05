@@ -30,6 +30,8 @@ async function loadBooks(): Promise<{ books?: ApiBook[]; error?: string }> {
       throw new Error("The books API returned an invalid response.");
     }
 
+    books.sort((first, second) => second._id.localeCompare(first._id));
+
     return { books };
   } catch (error) {
     const message =
