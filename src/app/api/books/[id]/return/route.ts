@@ -1,6 +1,8 @@
 import { ObjectId } from "mongodb";
 
 import { auth, client } from "@/lib/auth";
+import { getApiUrl } from "@/lib/api-url";
+import { getBooksBackendHeaders } from "@/lib/books-backend-auth";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -39,8 +41,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     let backendResponse: Response;
     try {
       backendResponse = await fetch(
-        `http://localhost:8000/borrowed-books/${encodeURIComponent(id)}`,
-        { method: "DELETE", cache: "no-store" },
+        getApiUrl(`/borrowed-books/${encodeURIComponent(id)}`),
+        {
+          method: "DELETE",
+          headers: await getBooksBackendHeaders(request.headers),
+          cache: "no-store",
+        },
       );
     } catch (error) {
       await borrows.updateOne(

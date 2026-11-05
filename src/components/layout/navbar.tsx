@@ -3,8 +3,15 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { MenuIcon, XIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu } from "@base-ui/react/menu";
+import {
+  LogOutIcon,
+  MenuIcon,
+  UserRoundIcon,
+  XIcon,
+} from "lucide-react";
+import { toast } from "react-toastify";
 
 import { cn } from "cn";
 
@@ -16,14 +23,14 @@ import { authClient } from "@/lib/auth-client";
 /** Pages only members can see after login */
 const PUBLIC_LINKS = [
   { label: "Home", href: "/" },
-  { label: "All Books", href: "/all-books" },
+  { label: "All Books", href: "/books" },
   { label: "Add Book", href: "/add-book" },
   { label: "My Books", href: "/my-books" },
   { label: "My Borrows", href: "/my-borrows" },
-  { label: "Profile", href: "/profile" },
 ];
 
 export function Navbar() {
+  const router = useRouter();
   const pathname = usePathname();
   const [scrolled, setScrolled] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -41,20 +48,28 @@ export function Navbar() {
     };
   }, []);
 
+  const links = PUBLIC_LINKS.filter(
+    (link) => user || link.href === "/" || link.href === "/books",
+  );
   const isActive = (href: string) => pathname === href;
   const transparent = pathname === "/" && !scrolled && !menuOpen;
 
-  const links = PUBLIC_LINKS.filter((link) =>
-    user
-      ? true
-      : link.href !== "/profile" &&
-        link.href !== "/my-books" &&
-        link.href !== "/my-borrows",
-  );
-  const getLinkHref = (href: string) =>
-    href === "/add-book" && !user
-      ? "/register?callbackURL=%2Fadd-book"
-      : href;
+  async function handleLogout() {
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        toast.error(result.error.message || "Could not log out.");
+        return;
+      }
+
+      toast.success("Logged out successfully.");
+      router.replace("/");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Please try again.";
+      toast.error(`Could not log out: ${message}`);
+    }
+  }
 
   return (
     <header
@@ -91,7 +106,7 @@ export function Navbar() {
           {links.map((link) => (
             <li key={link.href}>
               <Link
-                href={getLinkHref(link.href)}
+                href={link.href}
                 className={cn(
                   "rounded-full px-4 py-2 text-sm transition-colors",
                   transparent
@@ -113,16 +128,57 @@ export function Navbar() {
           <ThemeToggle transparent={transparent} />
 
           {user ? (
-            <Button
-              nativeButton={false}
-              render={<Link href="/profile" />}
-              className={cn(
-                "hidden rounded-full lg:inline-flex",
-                transparent && "border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-              )}
-            >
-              {user.name.split(" ")[0]}
-            </Button>
+            <Menu.Root>
+              <Menu.Trigger
+                className={cn(
+                  "flex h-9 max-w-36 items-center gap-2 rounded-full border border-border bg-background/80 px-2 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  transparent &&
+                    "border-white/30 bg-white/10 text-white hover:bg-white/20",
+                )}
+              >
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt=""
+                    width={28}
+                    height={28}
+                    unoptimized
+                    className="size-7 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+                    <UserRoundIcon className="size-4" />
+                  </span>
+                )}
+                <span className="truncate">{user.name.split(" ")[0]}</span>
+              </Menu.Trigger>
+              <Menu.Portal>
+                <Menu.Positioner sideOffset={8} align="end" className="z-50">
+                  <Menu.Popup className="min-w-52 rounded-xl border border-border bg-popover p-1 text-popover-foreground shadow-lg outline-none">
+                    <div className="border-b border-border px-3 py-2">
+                      <p className="truncate text-sm font-semibold">{user.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                    <Menu.Item
+                      render={<Link href="/profile" />}
+                      className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none data-highlighted:bg-muted"
+                    >
+                      <UserRoundIcon className="size-4" />
+                      My Profile
+                    </Menu.Item>
+                    <Menu.Item
+                      onClick={() => void handleLogout()}
+                      className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive outline-none data-highlighted:bg-destructive/10"
+                    >
+                      <LogOutIcon className="size-4" />
+                      Logout
+                    </Menu.Item>
+                  </Menu.Popup>
+                </Menu.Positioner>
+              </Menu.Portal>
+            </Menu.Root>
           ) : (
             <div className="hidden items-center gap-1.5 lg:flex">
               <Button
@@ -171,7 +227,7 @@ export function Navbar() {
             {links.map((link) => (
               <li key={link.href}>
                 <Link
-                  href={getLinkHref(link.href)}
+                  href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className={cn(
                     "block rounded-lg px-3 py-2 text-sm transition-colors",
@@ -186,17 +242,7 @@ export function Navbar() {
             ))}
           </ul>
           <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3 lg:hidden">
-            {user ? (
-              <Button
-                nativeButton={false}
-                render={<Link href="/profile" />}
-                variant="outline"
-                className="col-span-2"
-                onClick={() => setMenuOpen(false)}
-              >
-                {user.name}
-              </Button>
-            ) : (
+            {!user && (
               <>
                 <Button
                   nativeButton={false}

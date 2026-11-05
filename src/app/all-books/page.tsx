@@ -1,8 +1,15 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { BookOpenIcon } from "lucide-react";
 
 import { BookCard } from "@/components/books/book-card";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { type Book } from "@/lib/books";
+import { getApiUrl } from "@/lib/api-url";
+
+export const metadata: Metadata = {
+  title: "All Books",
+};
 
 type ApiBook = Book & {
   _id: string;
@@ -10,7 +17,7 @@ type ApiBook = Book & {
 
 async function loadBooks(): Promise<{ books?: ApiBook[]; error?: string }> {
   try {
-    const response = await fetch("http://localhost:8000/all-books", {
+    const response = await fetch(getApiUrl("/all-books"), {
       cache: "no-store",
     });
 
@@ -73,13 +80,13 @@ export default function AllBooksPage() {
 
       <section
         aria-label="All books"
-        className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-5 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 xl:grid-cols-4"
+        className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-5 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-3"
       >
         <Suspense
           fallback={
-            <p className="col-span-full py-16 text-center text-muted-foreground">
-              Loading books...
-            </p>
+            <div className="col-span-full py-16">
+              <LoadingSpinner label="Loading books..." />
+            </div>
           }
         >
           <BooksGrid />

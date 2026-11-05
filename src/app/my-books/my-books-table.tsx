@@ -139,7 +139,7 @@ function BookRow({
       }
 
       toast.success("Book updated.");
-      router.replace(`/all-books/${encodeURIComponent(book._id)}`);
+      router.replace(`/books/${encodeURIComponent(book._id)}`);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -164,7 +164,7 @@ function BookRow({
       }
 
       toast.success("Book deleted.");
-      router.replace("/all-books");
+      router.replace("/books");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -179,7 +179,7 @@ function BookRow({
 
   return (
     <tr className="bg-card">
-      <td className="px-4 py-3">
+      <td className="px-2 py-3 sm:px-4">
         <div className="flex items-center gap-3">
           <div className="relative size-12 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
             {book.image ? (
@@ -204,13 +204,13 @@ function BookRow({
           </div>
         </div>
       </td>
-      <td className="px-4 py-3">
+      <td className="px-2 py-3 sm:px-4">
         <Badge variant="secondary">{book.category}</Badge>
       </td>
-      <td className="px-4 py-3 text-muted-foreground">
+      <td className="px-2 py-3 text-muted-foreground sm:px-4">
         {availableCopies} / {totalCopies}
       </td>
-      <td className="px-4 py-3">
+      <td className="px-2 py-3 sm:px-4">
         <div className="flex justify-end gap-2">
           <Dialog
             open={isEditing}
@@ -223,7 +223,9 @@ function BookRow({
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="icon"
+              aria-label={`Edit ${book.title}`}
+              className="sm:h-7 sm:w-auto sm:px-2.5"
               onClick={() => {
                 resetValues();
                 setIsEditing(true);
@@ -231,7 +233,7 @@ function BookRow({
               disabled={isDeleting}
             >
               <PencilIcon />
-              Edit
+              <span className="sr-only sm:not-sr-only">Edit</span>
             </Button>
             <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-lg">
               <DialogHeader>
@@ -360,12 +362,14 @@ function BookRow({
             <Button
               type="button"
               variant="destructive"
-              size="sm"
+              size="icon"
+              aria-label={`Delete ${book.title}`}
+              className="sm:h-7 sm:w-auto sm:px-2.5"
               onClick={() => setIsDeleteDialogOpen(true)}
               disabled={isDeleting}
             >
               <Trash2Icon />
-              Delete
+              <span className="sr-only sm:not-sr-only">Delete</span>
             </Button>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -400,21 +404,27 @@ function BookRow({
 
 export function MyBooksTable({ initialBooks }: { initialBooks: MyBook[] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
-      <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+    <div className="w-full overflow-hidden rounded-xl border border-border">
+      <table className="w-full table-fixed border-collapse text-left text-sm">
+        <colgroup>
+          <col className="w-[39%]" />
+          <col className="w-[19%]" />
+          <col className="w-[16%]" />
+          <col className="w-[26%]" />
+        </colgroup>
         <thead className="bg-muted/50 text-muted-foreground">
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className="px-2 py-3 font-medium sm:px-4">
               Book
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className="px-2 py-3 font-medium sm:px-4">
               Category
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className="px-2 py-3 font-medium sm:px-4">
               Copies
             </th>
-            <th scope="col" className="px-4 py-3 text-right font-medium">
-              Actions
+            <th scope="col" className="px-2 py-3 text-right font-medium sm:px-4">
+              <span className="sr-only sm:not-sr-only">Actions</span>
             </th>
           </tr>
         </thead>

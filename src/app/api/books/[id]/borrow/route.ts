@@ -1,6 +1,8 @@
 import { ObjectId } from "mongodb";
 
 import { auth, client } from "@/lib/auth";
+import { getApiUrl } from "@/lib/api-url";
+import { getBooksBackendHeaders } from "@/lib/books-backend-auth";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -34,7 +36,14 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     const book = await books.findOne(
       { _id: bookId },
-      { projection: { title: 1 } },
+      {
+        projection: {
+          title: 1,
+          author: 1,
+          category: 1,
+          image: 1,
+        },
+      },
     );
     if (!book) {
       return Response.json({ error: "Book not found." }, { status: 404 });
@@ -47,6 +56,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     const reservation = await borrows.insertOne({
       bookId: bookId.toHexString(),
       bookTitle: book.title,
+      bookAuthor: book.author,
+      bookCategory: book.category,
+      bookImage: book.image,
       userId: session.user.id,
       userName: session.user.name,
       userEmail: session.user.email,
@@ -57,8 +69,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     reservationId = reservation.insertedId;
 
     const backendResponse = await fetch(
-      `http://localhost:8000/borrow-book/${encodeURIComponent(id)}`,
-      { method: "POST", cache: "no-store" },
+      getApiUrl(`/borrow-book/${encodeURIComponent(id)}`),
+      {
+        method: "POST",
+        headers: await getBooksBackendHeaders(request.headers),
+        cache: "no-store",
+      },
     );
 
     if (!backendResponse.ok) {

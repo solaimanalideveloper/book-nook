@@ -8,15 +8,12 @@ import {
   ChevronRightIcon,
   BookOpenIcon,
 } from "lucide-react";
+import type { Swiper as SwiperInstance } from "swiper";
+import { Autoplay } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 import { cn } from "cn";
 
-import {
-  type CarouselApi,
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -57,104 +54,87 @@ const SLIDES = [
 const AUTOPLAY_MS = 5000;
 
 export function HeroCarousel() {
-  const [api, setApi] = React.useState<CarouselApi>();
+  const [swiper, setSwiper] = React.useState<SwiperInstance | null>(null);
   const [index, setIndex] = React.useState(0);
-  const [paused, setPaused] = React.useState(false);
-
-  // Track the selected slide (fires for clicks, drags and autoplay)
-  React.useEffect(() => {
-    if (!api) return;
-    const onSelect = () => setIndex(api.selectedScrollSnap());
-    api.on("select", onSelect);
-    api.on("reInit", onSelect);
-    return () => {
-      api.off("select", onSelect);
-      api.off("reInit", onSelect);
-    };
-  }, [api]);
-
-  // Auto-scroll every 5s. Reset whenever the slide changes,
-  // so manual navigation doesn't get skipped mid-cycle.
-  React.useEffect(() => {
-    if (!api || paused || SLIDES.length < 2) return;
-    const timer = setInterval(() => api.scrollNext(), AUTOPLAY_MS);
-    return () => clearInterval(timer);
-  }, [api, paused, index]);
 
   return (
     <section
       aria-roledescription="carousel"
       aria-label="Featured library photos"
       className="relative h-[100svh] min-h-[560px] overflow-hidden"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseEnter={() => swiper?.autoplay.stop()}
+      onMouseLeave={() => swiper?.autoplay.start()}
     >
-      {/* Slides — each with its own title, text and CTA, like a Swiper hero */}
-      <Carousel
-        setApi={setApi}
-        opts={{ loop: true }}
-        className="h-full [&_[data-slot='carousel-content']]:h-full"
+      <Swiper
+        modules={[Autoplay]}
+        slidesPerView={1}
+        loop
+        autoplay={{
+          delay: AUTOPLAY_MS,
+          disableOnInteraction: false,
+        }}
+        onSwiper={setSwiper}
+        onSlideChange={(instance) => setIndex(instance.realIndex)}
+        className="h-full w-full"
       >
-        <CarouselContent className="h-full -ml-0">
-          {SLIDES.map((slide, i) => (
-            <CarouselItem key={slide.src} className="relative h-full pl-0">
-              {/* Background image with slow zoom */}
-              <div
-                className={cn(
-                  "absolute inset-0",
-                  i === index && "animate-kenburns"
-                )}
-              >
-                <Image
-                  src={slide.src}
-                  alt={slide.alt}
-                  fill
-                  sizes="100vw"
-                  priority={i === 0}
-                  draggable={false}
-                  className="object-cover select-none"
-                />
-              </div>
+        {SLIDES.map((slide, i) => (
+          <SwiperSlide key={slide.src} className="relative h-full">
+            {/* Background image with slow zoom */}
+            <div
+              className={cn(
+                "absolute inset-0",
+                i === index && "animate-kenburns",
+              )}
+            >
+              <Image
+                src={slide.src}
+                alt={slide.alt}
+                fill
+                sizes="100vw"
+                priority={i === 0}
+                draggable={false}
+                className="object-cover select-none"
+              />
+            </div>
 
-              {/* Gradients for readability over every photo */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/40" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/10 to-transparent" />
+            {/* Gradients for readability over every photo */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/10 to-transparent" />
 
-              {/* Per-slide content */}
-              <div className="pointer-events-none absolute inset-0 flex flex-col justify-end">
-                <div className="mx-auto w-full max-w-7xl px-4 pb-32 sm:px-6 lg:pb-36">
-                  {slide.eyebrow ? (
-                    <Badge
-                      variant="outline"
-                      className="mb-5 h-7 rounded-full border-white/30 bg-white/10 px-4 text-[11px] font-semibold tracking-[0.3em] text-brand-accent uppercase backdrop-blur-sm"
-                    >
-                      {slide.eyebrow}
-                    </Badge>
-                  ) : null}
-                  <h1
-                    className={cn(
-                      "max-w-3xl text-4xl leading-[1.1] font-bold text-white sm:text-5xl lg:text-6xl xl:text-7xl"
-                    )}
+            {/* Per-slide content */}
+            <div className="pointer-events-none absolute inset-0 flex flex-col justify-end">
+              <div className="mx-auto w-full max-w-7xl px-4 pb-32 sm:px-6 lg:pb-36">
+                {slide.eyebrow ? (
+                  <Badge
+                    variant="outline"
+                    className="mb-5 h-7 rounded-full border-white/30 bg-white/10 px-4 text-[11px] font-semibold tracking-[0.3em] text-brand-accent uppercase backdrop-blur-sm"
                   >
-                    {slide.title}
-                  </h1>
-                  <p className="mt-4 max-w-md text-sm leading-6 text-white/75 sm:text-base">
-                    {slide.text}
-                  </p>
-                  <Button
-                    nativeButton={false}
-                    render={<Link href="/all-books" />}
-                    className="pointer-events-auto mt-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/85"
-                  >
-                    <BookOpenIcon className="size-4" />
-                    Browse Books
-                  </Button>
-                </div>
+                    {slide.eyebrow}
+                  </Badge>
+                ) : null}
+                <h1
+                  className={cn(
+                    "max-w-3xl text-4xl leading-[1.1] font-bold text-white sm:text-5xl lg:text-6xl xl:text-7xl",
+                  )}
+                >
+                  {slide.title}
+                </h1>
+                <p className="mt-4 max-w-md text-sm leading-6 text-white/75 sm:text-base">
+                  {slide.text}
+                </p>
+                <Button
+                  nativeButton={false}
+                  render={<Link href="/books" />}
+                  className="pointer-events-auto mt-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/85"
+                >
+                  <BookOpenIcon className="size-4" />
+                  Browse Books
+                </Button>
               </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
       {/* Bottom controls */}
       <div className="absolute inset-x-0 bottom-6 z-10">
@@ -172,7 +152,7 @@ export function HeroCarousel() {
                 role="tab"
                 aria-selected={i === index}
                 aria-label={`Go to slide ${i + 1}`}
-                onClick={() => api?.scrollTo(i)}
+                onClick={() => swiper?.slideToLoop(i)}
                 className={cn(
                   "h-2.5 w-8 rounded-full p-0 outline-none focus-visible:ring-white/60 hover:bg-white/40",
                   i === index ? "bg-brand-accent" : "bg-white/40"
@@ -186,7 +166,7 @@ export function HeroCarousel() {
             <Button
               size="icon"
               aria-label="Previous slide"
-              onClick={() => api?.scrollPrev()}
+              onClick={() => swiper?.slidePrev()}
               className="size-11 rounded-full border border-white/25 bg-white/15 text-white backdrop-blur-sm hover:bg-white/30 hover:text-white"
             >
               <ChevronLeftIcon className="size-5" />
@@ -195,7 +175,7 @@ export function HeroCarousel() {
             <Button
               size="icon"
               aria-label="Next slide"
-              onClick={() => api?.scrollNext()}
+              onClick={() => swiper?.slideNext()}
               className="size-11 rounded-full border border-white/25 bg-white/15 text-white backdrop-blur-sm hover:bg-white/30 hover:text-white"
             >
               <ChevronRightIcon className="size-5" />

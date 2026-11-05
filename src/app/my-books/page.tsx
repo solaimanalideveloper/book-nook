@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { BookOpenIcon, PlusIcon } from "lucide-react";
 
 import { auth } from "@/lib/auth";
+import { getApiUrl } from "@/lib/api-url";
 import { Button } from "@/components/ui/button";
 import { MyBooksTable, type MyBook } from "@/app/my-books/my-books-table";
+
+export const metadata: Metadata = {
+  title: "My Books",
+};
 
 function isMyBook(value: unknown): value is MyBook {
   if (typeof value !== "object" || value === null) return false;
@@ -30,7 +36,7 @@ async function loadMyBooks(email: string): Promise<{
   error?: string;
 }> {
   try {
-    const response = await fetch("http://localhost:8000/all-books", {
+    const response = await fetch(getApiUrl("/all-books"), {
       cache: "no-store",
     });
 

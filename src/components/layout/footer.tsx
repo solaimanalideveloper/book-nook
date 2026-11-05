@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 const EXPLORE_LINKS = [
   { label: "Home", href: "/" },
-  { label: "All Books", href: "/all-books" },
+  { label: "All Books", href: "/books" },
   { label: "Add Book", href: "/add-book" },
   { label: "My Books", href: "/my-books" },
   { label: "My Borrows", href: "/my-borrows" },

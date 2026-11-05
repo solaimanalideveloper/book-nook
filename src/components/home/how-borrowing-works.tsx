@@ -80,7 +80,7 @@ export function HowBorrowingWorks() {
         <div className="mt-12 flex justify-center">
           <Button
             nativeButton={false}
-            render={<Link href="/all-books" />}
+            render={<Link href="/books" />}
             size="lg"
             className="rounded-full"
           >

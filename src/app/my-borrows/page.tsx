@@ -3,19 +3,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { BookOpenIcon, CalendarDaysIcon } from "lucide-react";
+import type { Metadata } from "next";
+import { BookOpenIcon } from "lucide-react";
 import { ObjectId } from "mongodb";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ReturnBookButton } from "@/app/my-borrows/return-book-button";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { auth, client } from "@/lib/auth";
 import { formatDate } from "@/lib/books";
+
+export const metadata: Metadata = {
+  title: "My Borrows",
+};
 
 type BorrowRecord = {
   bookId: string;
   bookTitle: string;
+  bookAuthor?: string;
+  bookCategory?: string;
+  bookImage?: string;
   borrowedAt: Date | string;
   dueAt: Date | string;
 };
@@ -83,90 +91,158 @@ async function MyBorrowsContent() {
               Books you borrow will appear here. Only your own borrowed books
               are shown.
             </p>
-            <Button nativeButton={false} render={<Link href="/all-books" />}>
+            <Button nativeButton={false} render={<Link href="/books" />}>
               Browse books
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {borrowRecords.map((borrow, index) => {
-              const book = booksById.get(borrow.bookId);
-              const title = book?.title || borrow.bookTitle || "Borrowed book";
+          <>
+            <div className="grid gap-3 sm:hidden">
+              {borrowRecords.map((borrow, index) => {
+                const book = booksById.get(borrow.bookId);
+                const title = book?.title || borrow.bookTitle || "Borrowed book";
+                const image = book?.image || borrow.bookImage;
 
-              return (
-                <Card
-                  key={`${borrow.bookId}-${new Date(borrow.borrowedAt).getTime()}-${index}`}
-                  className="grid grid-cols-[96px_minmax(0,1fr)] gap-4 p-4 sm:grid-cols-[120px_minmax(0,1fr)]"
-                >
-                  <Link
-                    href={`/all-books/${encodeURIComponent(borrow.bookId)}`}
-                    aria-label={`View ${title}`}
-                    className="relative aspect-2/3 overflow-hidden rounded-lg bg-muted"
+                return (
+                  <article
+                    key={`mobile-${borrow.bookId}-${new Date(borrow.borrowedAt).getTime()}-${index}`}
+                    className="rounded-xl border border-border bg-card p-4"
                   >
-                    {book?.image ? (
-                      <Image
-                        src={book.image}
-                        alt={`Cover of ${title}`}
-                        fill
-                        sizes="120px"
-                        className="object-cover"
-                        unoptimized
-                      />
-                    ) : (
-                      <span className="flex h-full flex-col items-center justify-center gap-2 text-xs text-muted-foreground">
-                        <BookOpenIcon className="size-7" />
-                        No cover
-                      </span>
-                    )}
-                  </Link>
-
-                  <div className="flex min-w-0 flex-col gap-2">
-                    <Badge variant="secondary" className="w-fit">
-                      {book?.category || "Borrowed"}
-                    </Badge>
-                    <h2 className="line-clamp-2 text-base font-bold text-foreground">
-                      {title}
-                    </h2>
-                    <p className="truncate text-sm text-muted-foreground">
-                      {book?.author || "BookNook member"}
-                    </p>
-                    {book?.description && (
-                      <p className="line-clamp-2 text-xs text-muted-foreground">
-                        {book.description}
-                      </p>
-                    )}
-                    <div className="mt-auto space-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
-                      <p className="flex items-center gap-1.5">
-                        <CalendarDaysIcon className="size-3.5 shrink-0" />
-                        Borrowed {formatDate(borrow.borrowedAt)}
-                      </p>
-                      <p className="flex flex-wrap items-center gap-1.5">
-                        <CalendarDaysIcon className="size-3.5 shrink-0" />
-                        Due {formatDate(borrow.dueAt)}
-                        <Badge variant="outline" className="ml-auto">
-                          Borrowed
-                        </Badge>
-                      </p>
-                    </div>
-                    <Button
-                      nativeButton={false}
-                      render={
-                        <Link
-                          href={`/all-books/${encodeURIComponent(borrow.bookId)}`}
-                        />
-                      }
-                      variant="outline"
-                      size="sm"
-                      className="mt-1 w-full"
+                    <Link
+                      href={`/books/${encodeURIComponent(borrow.bookId)}`}
+                      className="flex min-w-0 items-center gap-3"
                     >
-                      View book
-                    </Button>
+                      <span className="relative size-14 shrink-0 overflow-hidden rounded-md bg-muted">
+                        {image ? (
+                          <Image
+                            src={image}
+                            alt={`Cover of ${title}`}
+                            fill
+                            sizes="56px"
+                            className="object-cover"
+                            unoptimized
+                          />
+                        ) : (
+                          <BookOpenIcon className="absolute inset-0 m-auto size-5 text-muted-foreground" />
+                        )}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate font-semibold text-foreground">
+                          {title}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {book?.author || borrow.bookAuthor || "BookNook member"}
+                        </span>
+                        <Badge variant="secondary" className="mt-1">
+                          {book?.category || borrow.bookCategory || "Borrowed"}
+                        </Badge>
+                      </span>
+                    </Link>
+
+                    <dl className="my-4 grid grid-cols-2 gap-3 rounded-lg bg-muted/50 p-3 text-sm">
+                      <div>
+                        <dt className="text-xs text-muted-foreground">
+                          Borrow Date
+                        </dt>
+                        <dd className="mt-1 font-medium">
+                          {formatDate(borrow.borrowedAt)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-muted-foreground">
+                          Return Date
+                        </dt>
+                        <dd className="mt-1 font-medium">
+                          {formatDate(borrow.dueAt)}
+                        </dd>
+                      </div>
+                    </dl>
+
                     <ReturnBookButton bookId={borrow.bookId} />
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="hidden overflow-x-auto rounded-xl border border-border bg-card sm:block">
+            <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+              <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th scope="col" className="px-4 py-3 font-semibold">
+                    Book
+                  </th>
+                  <th scope="col" className="px-4 py-3 font-semibold">
+                    Borrow Date
+                  </th>
+                  <th scope="col" className="px-4 py-3 font-semibold">
+                    Return Date
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {borrowRecords.map((borrow, index) => {
+                  const book = booksById.get(borrow.bookId);
+                  const title = book?.title || borrow.bookTitle || "Borrowed book";
+                  const image = book?.image || borrow.bookImage;
+
+                  return (
+                    <tr
+                      key={`${borrow.bookId}-${new Date(borrow.borrowedAt).getTime()}-${index}`}
+                      className="align-middle"
+                    >
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/books/${encodeURIComponent(borrow.bookId)}`}
+                          className="flex min-w-52 items-center gap-3"
+                        >
+                          <span className="relative size-12 shrink-0 overflow-hidden rounded-md bg-muted">
+                            {image ? (
+                              <Image
+                                src={image}
+                                alt={`Cover of ${title}`}
+                                fill
+                                sizes="48px"
+                                className="object-cover"
+                                unoptimized
+                              />
+                            ) : (
+                              <BookOpenIcon className="absolute inset-0 m-auto size-5 text-muted-foreground" />
+                            )}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block truncate font-semibold text-foreground">
+                              {title}
+                            </span>
+                            <span className="block truncate text-xs text-muted-foreground">
+                              {book?.author || borrow.bookAuthor || "BookNook member"}
+                            </span>
+                            <Badge variant="secondary" className="mt-1">
+                              {book?.category || borrow.bookCategory || "Borrowed"}
+                            </Badge>
+                          </span>
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                        {formatDate(borrow.borrowedAt)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                        {formatDate(borrow.dueAt)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end">
+                          <ReturnBookButton bookId={borrow.bookId} />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            </div>
+          </>
         )}
       </section>
     </>
@@ -177,7 +253,9 @@ export default function MyBorrowsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[65svh] animate-pulse bg-muted/30" />
+        <div className="flex min-h-[65svh] items-center justify-center">
+          <LoadingSpinner label="Loading your borrowed books..." />
+        </div>
       }
     >
       <MyBorrowsContent />

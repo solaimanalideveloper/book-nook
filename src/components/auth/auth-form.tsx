@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 
 function getPasswordError(password: string): string {
-  if (password.length < 8) return "Password must be at least 8 characters.";
+  if (password.length < 6) return "Password must be at least 6 characters.";
   if (!/[A-Z]/.test(password)) {
     return "Password must include at least one uppercase letter.";
   }
@@ -106,7 +106,11 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       if (isRegister) {
         toast.success("Account created.");
-        router.replace("/");
+        router.replace(
+          returnPath === "/"
+            ? "/login"
+            : `/login?callbackURL=${encodeURIComponent(returnPath)}`,
+        );
       } else {
         toast.success("Logged in successfully.");
         if (hasAccountNotLinked) {

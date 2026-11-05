@@ -1,31 +1,25 @@
 import Link from "next/link";
 import { ArrowRightIcon, BookOpenIcon } from "lucide-react";
+import { ObjectId } from "mongodb";
 
 import { BookCard } from "@/components/books/book-card";
 import { Button } from "@/components/ui/button";
+import { client } from "@/lib/auth";
 import { type Book } from "@/lib/books";
 
-type ApiBook = Book & {
-  _id: string;
-};
+type ApiBook = Book & { _id: ObjectId };
 
 async function LatestBooksGrid() {
-  let books: ApiBook[];
+  let latestBooks: ApiBook[];
 
   try {
-    const response = await fetch("http://localhost:8000/all-books", {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(`The books API responded with status ${response.status}.`);
-    }
-
-    const result: unknown = await response.json();
-    if (!Array.isArray(result)) {
-      throw new Error("The books API returned an invalid response.");
-    }
-    books = result as ApiBook[];
+    latestBooks = await client
+      .db("bookstore")
+      .collection<ApiBook>("book-nook")
+      .find({})
+      .sort({ _id: -1 })
+      .limit(6)
+      .toArray();
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Please try again later.";
@@ -36,20 +30,6 @@ async function LatestBooksGrid() {
       </p>
     );
   }
-
-  const latestBooks = books
-    .toSorted((first, second) => {
-      const firstAdded = new Date(first.createdAt).getTime();
-      const secondAdded = new Date(second.createdAt).getTime();
-      const firstTimestamp = Number.isFinite(firstAdded) ? firstAdded : 0;
-      const secondTimestamp = Number.isFinite(secondAdded) ? secondAdded : 0;
-
-      return (
-        secondTimestamp - firstTimestamp ||
-        second._id.localeCompare(first._id)
-      );
-    })
-    .slice(0, 6);
 
   if (latestBooks.length === 0) {
     return (
@@ -62,7 +42,11 @@ async function LatestBooksGrid() {
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {latestBooks.map((book) => (
-        <BookCard key={book._id} book={book} bookId={book._id} />
+        <BookCard
+          key={book._id.toHexString()}
+          book={book}
+          bookId={book._id.toHexString()}
+        />
       ))}
     </div>
   );
@@ -93,7 +77,7 @@ export function LatestBooks() {
         <div className="mt-10 flex justify-center">
           <Button
             nativeButton={false}
-            render={<Link href="/all-books" />}
+            render={<Link href="/books" />}
             size="lg"
             className="rounded-full"
           >

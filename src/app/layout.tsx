@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import "swiper/css";
 
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -19,7 +20,10 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "bookNook — Your neighbourhood library, online",
+  title: {
+    default: "BookNook | Home",
+    template: "BookNook | %s",
+  },
   description:
     "Find a book that someone nearby already loved, and borrow it for a week.",
 };

@@ -1,6 +1,8 @@
 import { ObjectId } from "mongodb";
 import { CATEGORIES } from "@/lib/books";
+import { getApiUrl } from "@/lib/api-url";
 import { auth, client } from "@/lib/auth";
+import { getBooksBackendHeaders } from "@/lib/books-backend-auth";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -103,10 +105,13 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
     const availableCopies = totalCopies - borrowedCopies;
     const backendResponse = await fetch(
-      `http://localhost:8000/all-books/${encodeURIComponent(id)}`,
+      getApiUrl(`/all-books/${encodeURIComponent(id)}`),
       {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(await getBooksBackendHeaders(request.headers)),
+        },
         body: JSON.stringify({
           title,
           author,
@@ -213,8 +218,12 @@ export async function DELETE(request: Request, { params }: RouteContext) {
     }
 
     const backendResponse = await fetch(
-      `http://localhost:8000/all-books/${encodeURIComponent(id)}`,
-      { method: "DELETE", cache: "no-store" },
+      getApiUrl(`/all-books/${encodeURIComponent(id)}`),
+      {
+        method: "DELETE",
+        headers: await getBooksBackendHeaders(request.headers),
+        cache: "no-store",
+      },
     );
 
     let backendResult: unknown;

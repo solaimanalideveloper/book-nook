@@ -81,7 +81,7 @@ export function TopCategories() {
           {CATEGORIES.map((category) => (
             <Link
               key={category.name}
-              href="/all-books"
+              href="/books"
               aria-label={`Browse ${category.name} books`}
               className="group"
             >

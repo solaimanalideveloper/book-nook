@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { BookOpenIcon } from "lucide-react";
 import { auth } from "@/lib/auth";
 
@@ -9,6 +10,8 @@ import { BorrowButton } from "@/app/all-books/[id]/borrow-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getApiUrl } from "@/lib/api-url";
+import { getBooksBackendHeaders } from "@/lib/books-backend-auth";
 import { formatDate } from "@/lib/books";
 
 type BookDetails = {
@@ -25,6 +28,10 @@ type BookDetails = {
   createdAt?: string;
 };
 
+export const metadata: Metadata = {
+  title: "Book Details",
+};
+
 function getCopies(value: number | string | undefined, fallback = 0): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -32,18 +39,24 @@ function getCopies(value: number | string | undefined, fallback = 0): number {
 
 export default async function BookDetailsPage({
   params,
-}: PageProps<"/all-books/[id]">) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
-  const session = await auth.api.getSession({ headers: await headers() });
+  const requestHeaders = await headers();
+  const session = await auth.api.getSession({ headers: requestHeaders });
   if (!session) {
     redirect(
-      `/register?callbackURL=${encodeURIComponent(`/all-books/${id}`)}`,
+      `/login?callbackURL=${encodeURIComponent(`/books/${id}`)}`,
     );
   }
 
   const response = await fetch(
-    `http://localhost:8000/all-books/${encodeURIComponent(id)}`,
-    { cache: "no-store" },
+    getApiUrl(`/all-books/${encodeURIComponent(id)}`),
+    {
+      headers: await getBooksBackendHeaders(requestHeaders),
+      cache: "no-store",
+    },
   );
 
   if (response.status === 404) notFound();
@@ -53,7 +66,6 @@ export default async function BookDetailsPage({
 
   const book = (await response.json()) as BookDetails | null;
   if (!book) notFound();
-// comment
 
   const totalCopies = getCopies(book.totalCopies);
   const availableCopies = getCopies(book.availableCopies, totalCopies);
@@ -123,7 +135,7 @@ export default async function BookDetailsPage({
           <BorrowButton bookId={book._id} availableCopies={availableCopies} />
           <Button
             nativeButton={false}
-            render={<Link href="/all-books" />}
+            render={<Link href="/books" />}
             variant="ghost"
           >
             Back to all books

@@ -1,20 +1,26 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 
 import { AddBookForm } from "@/app/add-book/add-book-form";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
+
+export const metadata: Metadata = {
+  title: "Add Book",
+};
 
 export default function AddBookPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-          <div className="h-6 w-1/3 animate-pulse rounded bg-muted" />
+        <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6">
+          <LoadingSpinner label="Loading the add-book form..." />
         </div>
       }
     >
       <ProtectedRoute
         returnTo="/add-book"
-        unauthenticatedTo="/register?callbackURL=%2Fadd-book"
+        unauthenticatedTo="/login?callbackURL=%2Fadd-book"
       >
         <>
           <div className="border-b border-border bg-muted/40 pt-28 pb-14">
@@ -30,16 +36,8 @@ export default function AddBookPage() {
 
           <Suspense
             fallback={
-              <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-                <div className="h-6 w-1/3 animate-pulse rounded bg-muted" />
-                <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div className="h-9 animate-pulse rounded bg-muted" />
-                  <div className="h-9 animate-pulse rounded bg-muted" />
-                  <div className="h-9 animate-pulse rounded bg-muted" />
-                  <div className="h-9 animate-pulse rounded bg-muted" />
-                  <div className="h-24 animate-pulse rounded bg-muted sm:col-span-2" />
-                  <div className="h-12 animate-pulse rounded bg-muted sm:col-span-2" />
-                </div>
+              <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6">
+                <LoadingSpinner label="Loading the add-book form..." />
               </div>
             }
           >

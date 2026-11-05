@@ -121,35 +121,35 @@ export function AddBookForm() {
         createdAt: addDate.toISOString(),
       };
 
-      let serverSaved = false;
+      const response = await fetch("/api/books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(book),
+      });
+
+      let result: unknown;
       try {
-        const res = await fetch("http://localhost:8000/add-books", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(book),
-        });
-
-        if (!res.ok) {
-          throw new Error(`The server responded with status ${res.status}.`);
-        }
-
-        serverSaved = true;
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Database request failed.";
-        saveBook(book);
-        toast.warning(
-          `Book saved locally because the database is unavailable. (${message})`,
+        result = await response.json();
+      } catch {
+        throw new Error(
+          `Books service returned invalid JSON (HTTP ${response.status}).`,
         );
       }
 
-      if (serverSaved) {
-        saveBook(book);
-        toast.success("Book added successfully.");
-        router.replace("/#latest-books");
+      if (!response.ok) {
+        const message =
+          typeof result === "object" &&
+          result !== null &&
+          "error" in result &&
+          typeof result.error === "string"
+            ? result.error
+            : `The Books API responded with status ${response.status}.`;
+        throw new Error(message);
       }
+
+      saveBook(book);
+      toast.success("Book added successfully.");
+      router.replace("/#latest-books");
 
       setForm(initialForm);
       setImageFile(null);

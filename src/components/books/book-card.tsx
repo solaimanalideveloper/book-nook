@@ -77,7 +77,7 @@ export function BookCard({
         </div>
         <Button
           nativeButton={false}
-          render={<Link href={`/all-books/${encodeURIComponent(bookId)}`} />}
+          render={<Link href={`/books/${encodeURIComponent(bookId)}`} />}
           className="mt-2 w-full group-hover/book:shadow-md"
         >
           View Details
