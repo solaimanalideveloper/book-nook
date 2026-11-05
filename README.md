@@ -1,59 +1,63 @@
-# BookNook
+# 📚 BookNook
 
-BookNook is a neighbourhood book-sharing application. Readers can browse books, view availability, and borrow a copy for seven days. Signed-in members can also add books to the shared catalogue.
+BookNook একটি neighbourhood book-sharing application। পাঠকেরা বই খুঁজে দেখতে, বইয়ের বিস্তারিত জানতে এবং সাত দিনের জন্য বই ধার নিতে পারেন। লগইন করা সদস্যেরা নিজেদের বই শেয়ার করা ক্যাটালগে যোগ করতে পারেন।
 
-## Features
+🔗 **লাইভ সাইট:** [https://book-nook-sigma-ten.vercel.app](https://book-nook-sigma-ten.vercel.app)
 
-- Home page with a featured-library carousel, recently added books, borrowing steps, and category links.
-- Responsive layouts for mobile, tablet, and desktop screens.
-- All-books catalogue and individual book detail pages.
-- Email/password registration and login, plus Google and GitHub sign-in.
-- Protected book details, add-book, My Books, My Borrows, and profile pages.
-- Book borrowing with a confirmation dialog, available-copy updates, and duplicate active-borrow prevention.
-- My Borrows table with book covers, borrow dates, due dates, and a return action.
-- Light and dark themes.
-- Warm paper-and-library-green palette with terracotta accents and coordinated elevated surfaces in light and dark themes; Inter body text and Playfair Display headings.
-- Add-book form with book details, copy count, add date, and cover-image upload UI.
+## ✨ বৈশিষ্ট্য
 
-My Books lists only books whose `addedByEmail` matches the signed-in member and supports editing or deleting those books. Books with an active borrow cannot be deleted. The My Borrows page lists the signed-in member's active borrows and lets them return a book.
+- 🏠 হোমপেজে বইয়ের ছবির carousel, সম্প্রতি যোগ করা বই, ধার নেওয়ার নিয়ম এবং বইয়ের category-র লিংক।
+- 📱 মোবাইল, ট্যাবলেট ও ডেস্কটপের জন্য responsive layout।
+- 📚 সব বইয়ের তালিকা, বইয়ের বিস্তারিত পৃষ্ঠা এবং category অনুযায়ী বই খোঁজার সুবিধা।
+- 🔐 ইমেইল/পাসওয়ার্ড দিয়ে নিবন্ধন ও লগইন, পাশাপাশি Google এবং GitHub দিয়ে sign-in।
+- 🔒 Add Book, My Books, My Borrows, Profile এবং বইয়ের বিস্তারিত পৃষ্ঠা লগইন করা সদস্যদের জন্য সংরক্ষিত।
+- ➕ নিজের বই যোগ করা, বইয়ের তথ্য সম্পাদনা করা এবং বই মুছে ফেলা। সক্রিয় borrow থাকলে বই মুছে ফেলা যায় না।
+- 🔄 বই ধার নেওয়া ও ফেরত দেওয়ার সময় available copy-র সংখ্যা হালনাগাদ হয়; একই সদস্য একই বইয়ের একাধিক সক্রিয় borrow করতে পারেন না।
+- 📋 My Borrows পাতায় ধার নেওয়া বই, ধার নেওয়ার তারিখ, ফেরত দেওয়ার শেষ তারিখ এবং বই ফেরত দেওয়ার সুবিধা।
+- 🌓 Light ও dark theme।
+- 🔔 সফল কাজ ও ত্রুটির বার্তা **React Toastify** toast দিয়ে দেখানো হয়।
+- 🖼️ বইয়ের তথ্য, copy-র সংখ্যা, যোগ করার তারিখ এবং cover image upload-সহ বই যোগ করার form।
+- 🗃️ My Books পাতায় শুধু লগইন করা সদস্যের যোগ করা বই দেখা যায়।
+- 📖 Home page-এ MongoDB collection থেকে নতুন ছয়টি বই দেখানো হয়।
 
-> **Live site:** The deployment link will be added after the project is hosted.
-
-## Tech stack
+## 🛠️ প্রযুক্তি
 
 - Next.js 16 App Router
-- React 19 and TypeScript
-- Swiper.js hero slider
+- React 19 ও TypeScript
 - Tailwind CSS v4
-- shadcn/ui components using Base UI primitives
-- Better Auth with MongoDB
+- Base UI primitive ব্যবহার করা shadcn/ui component
+- Swiper.js hero carousel
+- Better Auth ও MongoDB
 - MongoDB driver
+- React Toastify
 
-## Getting started
+## 🚀 নিজের কম্পিউটারে চালান
 
-### Requirements
+### প্রয়োজনীয় সফটওয়্যার ও সেবা
 
-- Node.js compatible with the installed Next.js version
+- ইনস্টল করা Next.js version-এর উপযোগী Node.js
 - npm
-- MongoDB for authentication and borrowing
-- The separate books backend described below
+- Authentication ও borrowing-এর জন্য MongoDB
+- আলাদা Books backend service
 
-### Install and run
+### ইনস্টল ও চালানো
 
 ```bash
+git clone <repository-link>
+cd book-nook
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+তারপর ব্রাউজারে [http://localhost:3000](http://localhost:3000) খুলুন।
 
-### Environment variables
+### Environment variable
 
-Create a `.env.local` file in the project root for MongoDB, the books backend, and OAuth sign-in:
+Project root-এ `.env.local` ফাইল তৈরি করে প্রয়োজনীয় মান বসান:
 
 ```env
 MONGODB_ADAPTER_URL=mongodb+srv://<username>:<password>@<cluster>/<database>
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=https://book-nook-server-side-ten.vercel.app
 IMGBB_API_KEY=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
@@ -63,82 +67,92 @@ BETTER_AUTH_SECRET=
 BETTER_AUTH_URL=http://localhost:3000
 ```
 
-Add an ImgBB API key to enable book-cover uploads. Keep credentials server-side and do not add a `NEXT_PUBLIC_` prefix to secret values. `NEXT_PUBLIC_API_URL` is intentionally public because it only contains the Books backend base URL. Configure the matching callback URLs in the Google and GitHub OAuth applications for the local and deployed app URLs.
+বইয়ের cover upload চালু করতে ImgBB API key যোগ করুন। Secret কখনো `NEXT_PUBLIC_` prefix দিয়ে রাখবেন না বা repository-তে commit করবেন না। `NEXT_PUBLIC_API_URL` public রাখা হয়েছে, কারণ এতে শুধু Books backend-এর base URL থাকে। Google ও GitHub OAuth application-এ local এবং deployed app-এর জন্য সঠিক callback URL configure করুন। Production-এ `BETTER_AUTH_URL`-এ deployed site-এর URL দিন।
 
-`NEXT_PUBLIC_API_URL` is the base URL of the separate Books backend. Change its value for the deployed backend.
+`NEXT_PUBLIC_API_URL` হলো আলাদাভাবে deploy করা Books backend-এর base URL। Backend-এর URL বদলালে এই মানটিও বদলাতে হবে।
 
-The `POST /api/upload-image` route accepts an image in multipart form data under the `image` field and returns an `imageUrl`. It requires a signed-in session and uploads the file to ImgBB using the server-side `IMGBB_API_KEY`.
+## 🔌 Books backend-এর ৮টি API
 
-## Books backend
+নিচের endpoint-গুলো আলাদা Books backend service-এর। `:id`-এর জায়গায় বইটির আসল MongoDB ID বসাতে হবে। উদাহরণ: `https://book-nook-server-side-ten.vercel.app/all-books/672abc1234567890abcdef12`।
 
-Book catalogue requests use a separately running backend; start that service separately because it is not included in this repository. Set `NEXT_PUBLIC_API_URL` to the backend base URL in `.env`.
+| # | কাজ | Method | Endpoint |
+|---|---|---|---|
+| ১ | নতুন বই যোগ করা | `POST` | [`/add-books`](https://book-nook-server-side-ten.vercel.app/add-books) |
+| ২ | সব বই দেখা | `GET` | [`/all-books`](https://book-nook-server-side-ten.vercel.app/all-books) |
+| ৩ | একটি বই দেখা | `GET` | [`/all-books/:id`](https://book-nook-server-side-ten.vercel.app/all-books/:id) |
+| ৪ | বইয়ের তথ্য আপডেট করা | `PATCH` | [`/all-books/:id`](https://book-nook-server-side-ten.vercel.app/all-books/:id) |
+| ৫ | বই মুছে ফেলা | `DELETE` | [`/all-books/:id`](https://book-nook-server-side-ten.vercel.app/all-books/:id) |
+| ৬ | বই borrow করা | `POST` | [`/borrow-book/:id`](https://book-nook-server-side-ten.vercel.app/borrow-book/:id) |
+| ৭ | borrowed বই ফেরত দেওয়া | `DELETE` | [`/borrowed-books/:id`](https://book-nook-server-side-ten.vercel.app/borrowed-books/:id) |
+| ৮ | বই return করা | `POST` | [`/return-book/:id`](https://book-nook-server-side-ten.vercel.app/return-book/:id) |
 
-The frontend expects these endpoints:
+এই repository-র frontend/server route বর্তমানে borrow করার সময় `POST /borrow-book/:id` এবং ফেরত দেওয়ার সময় `DELETE /borrowed-books/:id` ব্যবহার করে। তালিকার `POST /return-book/:id` backend-এর দেওয়া অতিরিক্ত endpoint; বর্তমান frontend flow এটি call করে না।
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` | `/all-books` | Return an array of books |
-| `GET` | `/all-books/:id` | Return one book, or `404` if it does not exist |
-| `POST` | `/add-books` | Save a book as JSON |
-| `POST` | `/borrow-book/:id` | Decrement a book's available copies |
-| `DELETE` | `/borrowed-books/:id` | Return a borrowed book and increment its available copies |
-| `PATCH` | `/all-books/:id` | Update a book from JSON and return the MongoDB update result |
-| `DELETE` | `/all-books/:id` | Delete a book by ID and return the MongoDB delete result |
-
-Book records are expected to contain:
+বইয়ের record-এ সাধারণত নিচের তথ্যগুলো থাকে:
 
 ```text
 _id, title, author, category, image, description,
 totalCopies, availableCopies, addedBy, addedByEmail, createdAt
 ```
 
-The add-book form currently saves to this backend and also keeps a browser-local copy. If the backend save fails, the form reports that it was saved locally; that local copy is not used by the server-rendered catalogue. The Home page reads the newest six books from the shared MongoDB collection with a database sort and limit.
-The Books backend initializes new books with all `totalCopies` available. Borrowing is the operation that reduces `availableCopies`.
+Backend নতুন বইয়ের সব copy available হিসেবে রাখে। Borrow হলে `availableCopies` কমে এবং return হলে বাড়ে।
 
-## Borrowing and authentication data
+## 🖼️ ছবি আপলোড
 
-- Better Auth stores its data in the `book-nook-client-auth` MongoDB database.
-- The borrowing route uses the `bookstore` database, with `book-nook` for books and `book-borrows` for borrow records.
-- `POST /api/books/:id/borrow` requires a signed-in session, reserves one active borrow per member/book, and forwards the copy decrement to the Books backend's `POST /borrow-book/:id` endpoint. `POST /api/books/:id/return` verifies the active borrow, forwards the copy increment to `DELETE /borrowed-books/:id`, and deletes the borrow record after the backend succeeds.
-- `PATCH` and `DELETE /api/my-books/:id` require a signed-in owner match. The PATCH route forwards validated book updates to the books backend and preserves the number of copies already borrowed. The DELETE route forwards deletion to the books backend and blocks deletion while any copies are borrowed.
-- Borrowing creates a unique index to prevent the same member from having multiple active borrows of one book.
-- Email/password registration requires at least six characters, including an uppercase and a lowercase letter.
+`POST /api/upload-image` route multipart form data-তে `image` field গ্রহণ করে এবং `imageUrl` ফেরত দেয়। এই route ব্যবহারের জন্য লগইন করা থাকতে হয় এবং server-এ `IMGBB_API_KEY` configure থাকতে হয়। ছবির সর্বোচ্চ আকার ৩২ MB। Cover image ImgBB-তে upload হয়।
 
-## Project structure
+## 📚 Books backend
+
+বইয়ের catalog-এর request আলাদা backend service-এ যায়। Backend এই repository-তে অন্তর্ভুক্ত নয়, তাই সেটি আলাদাভাবে চালু করতে হবে। `NEXT_PUBLIC_API_URL`-এ backend-এর base URL বসান।
+
+Add Book form backend-এ বই সংরক্ষণ করে এবং browser-এর local storage-এও একটি copy রাখে। Backend-এ save ব্যর্থ হলে form স্থানীয়ভাবে সংরক্ষণের বার্তা দেয়; তবে ওই local copy server-rendered catalog-এ ব্যবহার হয় না। Home page MongoDB collection থেকে sort ও limit করে নতুন ছয়টি বই আনে।
+
+## 🔐 Authentication ও borrowing-এর তথ্য
+
+- Better Auth-এর তথ্য `book-nook-client-auth` MongoDB database-এ রাখা হয়।
+- Borrowing route `bookstore` database ব্যবহার করে; বইয়ের জন্য `book-nook` এবং borrow record-এর জন্য `book-borrows` collection ব্যবহৃত হয়।
+- `POST /api/books/:id/borrow`-এ লগইন করা session প্রয়োজন। একই সদস্য ও বইয়ের একাধিক সক্রিয় borrow ঠেকাতে unique index তৈরি হয়। Route Books backend-এর `POST /borrow-book/:id` endpoint-এ copy কমানোর request পাঠায়।
+- `POST /api/books/:id/return` সক্রিয় borrow যাচাই করে, Books backend-এর `DELETE /borrowed-books/:id` endpoint-এ copy ফেরত দেওয়ার request পাঠায় এবং backend সফল হলে borrow record মুছে দেয়।
+- `PATCH` ও `DELETE /api/my-books/:id`-এ লগইন করা সদস্য বইটির মালিক কি না যাচাই করা হয়। PATCH ধার নেওয়া copy-র সংখ্যা অক্ষুণ্ণ রেখে update করে। কোনো copy ধার দেওয়া থাকলে DELETE বন্ধ থাকে।
+- ইমেইল/পাসওয়ার্ডে নিবন্ধনের password কমপক্ষে ছয় অক্ষরের হতে হবে এবং তাতে অন্তত একটি uppercase ও একটি lowercase letter থাকতে হবে।
+
+## 📁 Project-এর কাঠামো
 
 ```text
 src/
   app/
-    api/                 Auth, image-upload, and borrowing route handlers
-    add-book/            Protected add-book page and form
-    books/               Assignment's public catalogue and private detail routes
-    all-books/           Existing catalogue/detail route compatibility
-    loading.tsx          Shared loading indicator
-    not-found.tsx        Custom 404 page
-    login/               Login page
-    my-books/            Signed-in member's own books
-    my-borrows/          Signed-in member's borrow table and return action
-    profile/             Account and linked social providers
-    register/            Registration page
+    api/                 Authentication, image upload ও borrowing API route
+    add-book/            লগইন-সুরক্ষিত বই যোগ করার পৃষ্ঠা ও form
+    books/               Public catalog ও ব্যক্তিগত বইয়ের বিস্তারিত route
+    all-books/           Catalog/detail route-এর পুরোনো compatibility
+    loading.tsx          সবার জন্য loading indicator
+    not-found.tsx        নিজস্ব 404 পৃষ্ঠা
+    login/               লগইন পৃষ্ঠা
+    my-books/            সদস্যের নিজের বইয়ের তালিকা
+    my-borrows/          ধার নেওয়া বইয়ের তালিকা ও return action
+    profile/             Account ও সংযুক্ত social provider
+    privacy-policy/      Privacy Policy পৃষ্ঠা
+    register/            নিবন্ধন পৃষ্ঠা
+    terms-of-service/     Terms of Service পৃষ্ঠা
   components/
-    auth/                Authentication form and route protection
-    books/               Reusable book card
-    home/                Home page sections
-    layout/              Navigation and footer
-    shared/              Shared loading UI
-    theme/               Theme provider and toggle
-    ui/                  Reusable UI primitives
-  lib/                   Auth setup, book types, API URL, and utilities
+    auth/                Authentication form ও route protection
+    books/               পুনর্ব্যবহারযোগ্য book card
+    home/                হোমপেজের বিভিন্ন অংশ
+    layout/              Navigation ও footer
+    shared/              সাধারণ loading UI
+    theme/               Theme provider ও toggle
+    ui/                  পুনর্ব্যবহারযোগ্য UI component
+  lib/                   Authentication setup, book type, API URL ও utility
 ```
 
-## Available commands
+## 🧰 চালানোর command
 
 ```bash
-npm run dev       # Start the development server
-npm run build     # Create a production build
-npm run start     # Run the production server
-npm run lint      # Run ESLint
-npx tsc --noEmit  # Check TypeScript types
+npm run dev       # Development server চালু করুন
+npm run build     # Production build তৈরি ও যাচাই করুন
+npm run start     # Production server চালু করুন
+npm run lint      # ESLint চালান
+npx tsc --noEmit  # TypeScript type পরীক্ষা করুন
 ```
 
-There is currently no test framework configured in the project.
+এই project-এ বর্তমানে আলাদা test framework configure করা নেই।

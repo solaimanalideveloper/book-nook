@@ -17,14 +17,18 @@ const EXPLORE_LINKS = [
 ];
 
 const LEGAL_LINKS = [
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Service", href: "/terms-of-service" },
 ];
 
 const CONTACTS = [
   { icon: MailIcon, label: "hello@booknook.com", href: "mailto:hello@booknook.com" },
   { icon: PhoneIcon, label: "+880 1700-000000", href: "tel:+8801700000000" },
-  { icon: MapPinIcon, label: "42 Book Street, Dhaka", href: "#" },
+  {
+    icon: MapPinIcon,
+    label: "42 Book Street, Dhaka",
+    href: "https://www.google.com/maps/search/?api=1&query=42%20Book%20Street%2C%20Dhaka",
+  },
 ];
 
 /** Official brand glyphs — this lucide version ships no social/brand icons */
@@ -95,6 +99,8 @@ export function Footer() {
               <li key={contact.label}>
                 <a
                   href={contact.href}
+                  target={contact.href.startsWith("https://") ? "_blank" : undefined}
+                  rel={contact.href.startsWith("https://") ? "noreferrer" : undefined}
                   className="flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <contact.icon className="size-4 shrink-0" />
